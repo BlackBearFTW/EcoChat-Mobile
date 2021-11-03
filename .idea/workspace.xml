@@ -4,10 +4,7 @@
     <list default="true" id="d43a05e4-7d8e-4641-94a8-46c02272942e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/map-style.json" beforeDir="false" afterPath="$PROJECT_DIR$/assets/map-style.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/assets/marker-icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/assets/marker-icon.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,7 +45,7 @@
       <option name="presentableId" value="Default" />
       <updated>1635855268261</updated>
       <workItem from="1635855272423" duration="7742000" />
-      <workItem from="1635927430238" duration="7035000" />
+      <workItem from="1635927430238" duration="15513000" />
     </task>
     <servers />
   </component>
