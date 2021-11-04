@@ -1,13 +1,14 @@
 import * as React from 'react';
-import MapView, {Marker, Overlay} from 'react-native-maps';
-import {StyleSheet, Text, View, Dimensions, StatusBar, TouchableOpacity, Image} from 'react-native';
+import MapView, {Marker, Overlay, Region} from 'react-native-maps';
+import {StyleSheet, Text, View, Dimensions, StatusBar, TouchableOpacity, Image, Alert} from 'react-native';
 
 import * as Location from 'expo-location';
 import {mapStyle} from "./assets/map-style.json";
-import {useEffect, useState} from "react";
+import {useEffect, useRef} from "react";
+import {LocationObject} from "expo-location";
 
 export default function App() {
-    const [location, setLocation] = useState<any>(null);
+    const mapView = useRef<MapView>();
 
     useEffect(() => {
         (async () => {
@@ -16,48 +17,45 @@ export default function App() {
         })();
     }, []);
 
-  return (
-      <>
+    return (
+        <>
+            <MapView
+                style={styles.map}
+                customMapStyle={mapStyle}
+                showsUserLocation={true}
+                toolbarEnabled={false}
+                ref={(current) => mapView.current = current!}
+                minZoomLevel={10}
+                showsCompass={false}
+                showsMyLocationButton={false}
+                initialRegion={{
+                    latitude: 51.4392648,
+                    longitude: 5.478633,
+                    latitudeDelta: 0.2,
+                    longitudeDelta: 0.2
+                }}>
+                <Marker
+                    key={"1"}
+                    coordinate={{
+                        latitude: 51.44369794468786,
+                        longitude: 5.47874608280784
+                    }}
+                    image={require("./assets/marker-icon.png")}
+                    pinColor={"green"}
+                />
+            </MapView>
 
-          <TouchableOpacity
-              style={styles.myLocation}
-          >
-              <Image source={require("./assets/user-location.png")} style={styles.myLocationIcon} />
-          </TouchableOpacity>
-          <MapView
-              style={styles.map}
-              customMapStyle={mapStyle}
-              showsUserLocation={true}
-              toolbarEnabled={false}
-              minZoomLevel={10}
-              showsCompass={false}
-              showsMyLocationButton={false}
-              initialRegion={{
-                  latitude: 51.441643,
-                  longitude: 5.469722,
-                  latitudeDelta: 0,
-                  longitudeDelta: 0
-              }}>
-              <Marker
-                  key={"1"}
-                  coordinate={{
-                      latitude: 51.44369794468786,
-                      longitude: 5.47874608280784
-                  }}
-                  image={require("./assets/marker-icon.png")}
-                  pinColor={"green"}
-              />
-          </MapView>
-      </>
-  );
+
+        </>
+    );
 }
 
 const styles = StyleSheet.create({
-  map: {
-    width: Dimensions.get('screen').width,
-    height: Dimensions.get('screen').height,
-      elevation: 3
-  },
+    map: {
+        width: Dimensions.get('screen').width,
+        height: Dimensions.get('screen').height,
+        elevation: 1
+    },
     myLocation: {
         alignItems: 'center',
         justifyContent: 'center',
@@ -75,10 +73,10 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.36,
         shadowRadius: 6.68,
-        elevation: 11,
+        elevation: 999,
     },
     myLocationIcon: {
-      width: 30,
+        width: 30,
         height: 30
     }
 });
