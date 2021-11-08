@@ -1,5 +1,5 @@
 import * as React from 'react';
-import MapView, {Marker, PROVIDER_GOOGLE, Region} from 'react-native-maps';
+import MapView, {LatLng, Marker, PROVIDER_GOOGLE, Region} from 'react-native-maps';
 import {StyleSheet, Text, View, Dimensions, StatusBar, TouchableOpacity, Image, Alert} from 'react-native';
 import * as Location from 'expo-location';
 import {mapStyle} from "./assets/map-style.json";
@@ -7,18 +7,14 @@ import {useEffect, useRef, useState} from "react";
 import CurrentLocationButton from "./components/CurrentLocationButton";
 import Header from "./components/Header";
 import { collection, getDocs, collectionGroup} from "firebase/firestore";
+import * as Linking from 'expo-linking';
 import db from "./firestore";
-
-interface MarkerData {
-    latitude: number,
-    longitude: number
-}
 
 export default function App() {
     const mapView = useRef<MapView>();
     const [mapReady, setMapReady] = useState(false);
     const [showMarkers, setMarkerVisibility] = useState(true);
-    const [markers, setMarkers] = useState<MarkerData[]>([]);
+    const [markers, setMarkers] = useState<LatLng[]>([]);
     StatusBar.setHidden(false)
     StatusBar.setBackgroundColor("#389162")
 
@@ -43,7 +39,7 @@ export default function App() {
             }, {duration: 1000});
 
             const querySnapshot = await getDocs(collectionGroup(db, "markers"));
-            const data: MarkerData[] = [];
+            const data: LatLng[] = [];
 
             querySnapshot.forEach((doc) => {
                 const result = doc.data();
@@ -57,6 +53,12 @@ export default function App() {
             setMarkers(data);
         })();
     }, []);
+
+    const getRouteUrl = async (coords: LatLng) => {
+        const location = await Location.getCurrentPositionAsync();
+
+        return `https://www.google.com/maps/dir/${location.coords.latitude},${location.coords.longitude}/${coords.latitude},${coords.longitude}`
+    }
 
     return (
         <>
@@ -89,6 +91,10 @@ export default function App() {
                         coordinate={{
                             latitude: marker.latitude,
                             longitude: marker.longitude
+                        }}
+                        onPress={event => {
+                            getRouteUrl(event.nativeEvent.coordinate)
+                                .then(url => Linking.openURL(url));
                         }}
                         image={require("./assets/marker-icon.png")}
                         pinColor={"green"}
