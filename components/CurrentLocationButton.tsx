@@ -11,8 +11,9 @@ function CurrentLocationButton({mapView}: {mapView: MapView}) {
         mapView.animateCamera({
             center: {
                 latitude: location.coords.latitude,
-                longitude: location.coords.longitude
-            }
+                longitude: location.coords.longitude,
+            },
+            zoom: 18
         }, {duration: 1000});
     }
 

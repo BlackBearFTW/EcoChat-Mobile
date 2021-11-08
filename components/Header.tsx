@@ -21,7 +21,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#33835c",
         flex:1,
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8
     },
     headerText: {
         color: "white",
