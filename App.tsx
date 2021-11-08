@@ -1,5 +1,5 @@
 import * as React from 'react';
-import MapView, {Marker} from 'react-native-maps';
+import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import {StyleSheet, Text, View, Dimensions, StatusBar, TouchableOpacity, Image} from 'react-native';
 import * as Location from 'expo-location';
 import {mapStyle} from "./assets/map-style.json";
@@ -18,7 +18,8 @@ export default function App() {
     const mapView = useRef<MapView>();
     const [mapReady, setMapReady] = useState(false);
     const [markers, setMarkers] = useState<MarkerData[]>([]);
-    StatusBar.setHidden(true)
+    StatusBar.setHidden(false)
+    StatusBar.setBackgroundColor("#389162")
 
     useEffect(() => {
         (async () => {
@@ -42,17 +43,17 @@ export default function App() {
         })();
     }, []);
 
-    console.log(markers);
-
     return (
         <>
             <MapView
                 style={styles.map}
+                provider={PROVIDER_GOOGLE}
                 customMapStyle={mapStyle}
                 showsUserLocation={true}
                 toolbarEnabled={false}
                 ref={(current) => mapView.current = current!}
                 minZoomLevel={10}
+                maxZoomLevel={18}
                 showsCompass={false}
                 showsMyLocationButton={false}
                 onMapReady={() => setMapReady(true)}

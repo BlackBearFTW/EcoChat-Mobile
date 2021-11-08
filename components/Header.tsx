@@ -1,4 +1,4 @@
-import {Dimensions, StyleSheet, Text, View} from "react-native";
+import {Dimensions, StatusBar, StyleSheet, Text, View} from "react-native";
 import * as React from "react";
 
 function Header() {
@@ -15,19 +15,13 @@ const styles = StyleSheet.create({
     header: {
         elevation: 24,
         position: "absolute",
+        top: StatusBar.currentHeight,
         width: Dimensions.get('screen').width,
         height: 60,
         backgroundColor: "#33835c",
         flex:1,
         justifyContent: "center",
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 12,
-        },
-        shadowOpacity: 0.58,
-        shadowRadius: 16.00,
+        alignItems: "center"
     },
     headerText: {
         color: "white",
