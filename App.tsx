@@ -6,7 +6,7 @@ import {mapStyle} from "./assets/map-style.json";
 import {useEffect, useRef, useState} from "react";
 import CurrentLocationButton from "./components/CurrentLocationButton";
 import Header from "./components/Header";
-import { collection, getDocs} from "firebase/firestore";
+import { collection, getDocs, collectionGroup} from "firebase/firestore";
 import db from "./firestore";
 
 interface MarkerData {
@@ -42,7 +42,7 @@ export default function App() {
                 zoom: 18
             }, {duration: 1000});
 
-            const querySnapshot = await getDocs(collection(db, "markers"));
+            const querySnapshot = await getDocs(collectionGroup(db, "markers"));
             const data: MarkerData[] = [];
 
             querySnapshot.forEach((doc) => {
