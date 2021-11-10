@@ -1,32 +1,30 @@
 import * as React from 'react';
-import MapView, {LatLng, Marker, PROVIDER_GOOGLE, Region} from 'react-native-maps';
-import {StyleSheet, Text, View, Dimensions, StatusBar, TouchableOpacity, Image, Alert} from 'react-native';
+import MapView, {LatLng, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+import {StyleSheet, Dimensions, StatusBar, Linking} from 'react-native';
 import * as Location from 'expo-location';
 import {mapStyle} from "./assets/map-style.json";
 import {useEffect, useRef, useState} from "react";
 import CurrentLocationButton from "./components/CurrentLocationButton";
 import Header from "./components/Header";
-import { collection, getDocs, collectionGroup} from "firebase/firestore";
-import * as Linking from 'expo-linking';
+import { getDocs, collectionGroup} from "firebase/firestore";
 import db from "./firestore";
+import MarkerPopup from "./components/MarkerPopup";
 
 export default function App() {
     const mapView = useRef<MapView>();
     const [mapReady, setMapReady] = useState(false);
     const [showMarkers, setMarkerVisibility] = useState(true);
-    const [markers, setMarkers] = useState<LatLng[]>([]);
-    StatusBar.setHidden(false)
-    StatusBar.setBackgroundColor("#389162")
+    const [markersData, setMarkersData] = useState<PartialMarkerInterface[]>([]);
+    const [activeMarker, setActiveMarker] = useState<PartialMarkerInterface | null>(null);
 
     useEffect(() => {
         (async () => {
-
+            StatusBar.setHidden(false)
+            StatusBar.setBackgroundColor("#389162")
             const {status} = await Location.requestForegroundPermissionsAsync();
 
-            if (status !== 'granted') {
-                // TODO: Deal with users who denied location permission
-                return;
-            }
+            // TODO: Deal with users who denied location permission
+            if (status !== 'granted') return;
 
             const location = await Location.getCurrentPositionAsync();
 
@@ -39,24 +37,25 @@ export default function App() {
             }, {duration: 1000});
 
             const querySnapshot = await getDocs(collectionGroup(db, "markers"));
-            const data: LatLng[] = [];
+            const data: PartialMarkerInterface[] = [];
 
             querySnapshot.forEach((doc) => {
-                const result = doc.data();
-
+                const documentData = doc.data()
                 data.push({
-                    latitude: result["geodata"].latitude,
-                    longitude: result["geodata"].longitude
-                })
+                    documentId: doc.id,
+                    location: {
+                        latitude: documentData["location"].latitude,
+                        longitude: documentData["location"].longitude
+                    }
+                });
             });
 
-            setMarkers(data);
+            setMarkersData(data);
         })();
     }, []);
 
     const getRouteUrl = async (coords: LatLng) => {
         const location = await Location.getCurrentPositionAsync();
-
         return `https://www.google.com/maps/dir/${location.coords.latitude},${location.coords.longitude}/${coords.latitude},${coords.longitude}`
     }
 
@@ -74,6 +73,7 @@ export default function App() {
                 showsCompass={false}
                 showsMyLocationButton={false}
                 onMapReady={() => setMapReady(true)}
+                onPress={() => setActiveMarker(null)}
                 onRegionChange={region => {
                     (region.longitudeDelta >= 0.079 && region.latitudeDelta >= 0.079) ?
                         setMarkerVisibility(false) :
@@ -85,16 +85,15 @@ export default function App() {
                     latitudeDelta: 0.2,
                     longitudeDelta: 0.2
                 }}>
-                {showMarkers && markers?.map(marker => (
+                {showMarkers && markersData?.map((marker, index) => (
                     <Marker
-                        key={marker.longitude + marker.latitude}
+                        key={index}
                         coordinate={{
-                            latitude: marker.latitude,
-                            longitude: marker.longitude
+                            latitude: marker.location.latitude,
+                            longitude: marker.location.longitude
                         }}
                         onPress={event => {
-                            getRouteUrl(event.nativeEvent.coordinate)
-                                .then(url => Linking.openURL(url));
+                            setActiveMarker(marker);
                         }}
                         image={require("./assets/marker-icon.png")}
                         pinColor={"green"}
@@ -105,6 +104,7 @@ export default function App() {
             <Header />
 
             {mapReady && <CurrentLocationButton mapView={mapView.current!} />}
+            {/*{activeMarker && <MarkerPopup markerDocumentId={activeMarker!.documentId} /> }*/}
         </>
     );
 }
