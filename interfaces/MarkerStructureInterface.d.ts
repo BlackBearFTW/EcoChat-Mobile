@@ -3,7 +3,8 @@ interface MarkerStructureInterface {
         latitude: number,
         longitude: number
     },
-    status: MarkerStatusStructureInterface
+    sensorStatus: MarkerStatusStructureInterface
+    roofed: boolean
 }
 
 interface MarkerStatusStructureInterface {
@@ -12,7 +13,6 @@ interface MarkerStatusStructureInterface {
         total: number,
         available: number
     },
-    roofed: boolean
 }
 
 export default MarkerStructureInterface

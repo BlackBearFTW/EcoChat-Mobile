@@ -2,12 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d43a05e4-7d8e-4641-94a8-46c02272942e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/components/MarkerPopup.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/interfaces/MarkerStructureInterface.d.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/interfaces/PartialMarkerInterface.d.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/CurrentLocationButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/CurrentLocationButton.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/MarkerPopup.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/MarkerPopup.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/interfaces/MarkerStructureInterface.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/MarkerStructureInterface.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +45,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="editor.preferences.appearance" />
+    <property name="settings.editor.selected.configurable" value="proofread" />
     <property name="ts.external.directory.path" value="C:\Users\Gebruiker\Documents\Fontys\Proftaak\Design Challenge\MobileApp\node_modules\typescript\lib" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
@@ -67,7 +67,7 @@
       <workItem from="1635963112809" duration="32000" />
       <workItem from="1636013819134" duration="44217000" />
       <workItem from="1636447118151" duration="6382000" />
-      <workItem from="1636454227200" duration="6846000" />
+      <workItem from="1636454227200" duration="16704000" />
     </task>
     <servers />
   </component>
@@ -85,5 +85,9 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

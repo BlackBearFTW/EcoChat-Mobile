@@ -6,14 +6,13 @@ import {mapStyle} from "./assets/map-style.json";
 import {useEffect, useRef, useState} from "react";
 import CurrentLocationButton from "./components/CurrentLocationButton";
 import Header from "./components/Header";
-import { getDocs, collectionGroup} from "firebase/firestore";
+import { getDocs, collection} from "firebase/firestore";
 import db from "./firestore";
 import MarkerPopup from "./components/MarkerPopup";
 
 export default function App() {
     const mapView = useRef<MapView>();
     const [mapReady, setMapReady] = useState(false);
-    const [showMarkers, setMarkerVisibility] = useState(true);
     const [markersData, setMarkersData] = useState<PartialMarkerInterface[]>([]);
     const [activeMarker, setActiveMarker] = useState<PartialMarkerInterface | null>(null);
 
@@ -36,7 +35,7 @@ export default function App() {
                 zoom: 18
             }, {duration: 1000});
 
-            const querySnapshot = await getDocs(collectionGroup(db, "markers"));
+            const querySnapshot = await getDocs(collection(db, "markers"));
             const data: PartialMarkerInterface[] = [];
 
             querySnapshot.forEach((doc) => {
@@ -54,11 +53,6 @@ export default function App() {
         })();
     }, []);
 
-    const getRouteUrl = async (coords: LatLng) => {
-        const location = await Location.getCurrentPositionAsync();
-        return `https://www.google.com/maps/dir/${location.coords.latitude},${location.coords.longitude}/${coords.latitude},${coords.longitude}`
-    }
-
     return (
         <>
             <MapView
@@ -74,18 +68,13 @@ export default function App() {
                 showsMyLocationButton={false}
                 onMapReady={() => setMapReady(true)}
                 onPress={() => setActiveMarker(null)}
-                onRegionChange={region => {
-                    (region.longitudeDelta >= 0.079 && region.latitudeDelta >= 0.079) ?
-                        setMarkerVisibility(false) :
-                        setMarkerVisibility(true)
-                }}
                 initialRegion={{
                     latitude: 51.4392648,
                     longitude: 5.478633,
                     latitudeDelta: 0.2,
                     longitudeDelta: 0.2
                 }}>
-                {showMarkers && markersData?.map((marker, index) => (
+                {markersData?.map((marker, index) => (
                     <Marker
                         key={index}
                         coordinate={{
@@ -104,7 +93,7 @@ export default function App() {
             <Header />
 
             {mapReady && <CurrentLocationButton mapView={mapView.current!} />}
-            {/*{activeMarker && <MarkerPopup markerDocumentId={activeMarker!.documentId} /> }*/}
+            {activeMarker && <MarkerPopup markerDocumentId={activeMarker!.documentId} /> }
         </>
     );
 }
