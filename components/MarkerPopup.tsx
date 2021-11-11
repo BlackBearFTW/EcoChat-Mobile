@@ -1,5 +1,5 @@
 import MarkerStructureInterface from "../interfaces/MarkerStructureInterface";
-import {Animated, Button, Dimensions, Image, Linking, StyleSheet, Text, TouchableHighlight, View} from "react-native";
+import {Button, Dimensions, Image, Linking, StyleSheet, Text, TouchableHighlight, View} from "react-native";
 import * as React from "react";
 import {collectionGroup, doc, getDocs, onSnapshot} from "firebase/firestore";
 import db from "../firestore"
@@ -7,12 +7,24 @@ import {useEffect, useState} from "react";
 import {LatLng} from "react-native-maps";
 import * as Location from "expo-location";
 import Icon from 'react-native-vector-icons/Ionicons';
+import Animated, {
+    useSharedValue,
+    withTiming,
+    useAnimatedStyle,
+} from 'react-native-reanimated';
 
 function MarkerPopup({markerDocumentId}: {markerDocumentId: string}) {
     const [markerData, setMarkerData] = useState<MarkerStructureInterface | null>(null);
+    const bottomValue = useSharedValue(-200);
+
+    const animationStyle = useAnimatedStyle(() => ({bottom: bottomValue.value}))
 
     useEffect(() => {
+        bottomValue.value = withTiming(0, {duration: 150})
+    }, []);
 
+
+    useEffect(() => {
         onSnapshot(doc(db, "markers", markerDocumentId), (doc) => {
             setMarkerData(doc.data() as MarkerStructureInterface)
         });
@@ -25,7 +37,7 @@ function MarkerPopup({markerDocumentId}: {markerDocumentId: string}) {
     }
 
     return (
-        <Animated.View style={styles.container}>
+        <Animated.View style={[styles.container, animationStyle]}>
             <View style={styles.sensorParentContainer}>
                 <View style={styles.sensorContainer}>
                     <Text style={styles.sensorText}>{`${markerData?.sensorStatus.batteryLevel ?? "..."}%`}</Text>

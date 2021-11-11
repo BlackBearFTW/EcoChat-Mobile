@@ -1,9 +1,32 @@
 import MapView from "react-native-maps";
-import { Image, StyleSheet, TouchableOpacity} from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View} from "react-native";
 import * as Location from "expo-location";
 import * as React from "react";
+import Animated, {
+    useSharedValue,
+    withTiming,
+    useAnimatedStyle,
+} from 'react-native-reanimated';
+import {useEffect} from "react";
 
-function CurrentLocationButton({mapView}: {mapView: MapView}) {
+function CurrentLocationButton({mapView, popupOpen}: {mapView: MapView, popupOpen: boolean}) {
+    const bottomValue = useSharedValue(15);
+    const scaleValue = useSharedValue(1);
+
+    const animationStyle = useAnimatedStyle(() => {
+        return {
+            bottom: bottomValue.value,
+            transform: [{
+                scale: scaleValue.value
+            }]
+        }
+    })
+
+    useEffect(() => {
+        bottomValue.value = withTiming(popupOpen ? 215 : 15, {duration: 150})
+        scaleValue.value = withTiming(popupOpen ? 0.8 : 1)
+    }, [popupOpen]);
+
 
     const handlePress = async () => {
         const location = await Location.getCurrentPositionAsync();
@@ -18,18 +41,20 @@ function CurrentLocationButton({mapView}: {mapView: MapView}) {
     }
 
     return (
-        <TouchableOpacity
-            style={styles.myLocation}
-            onPress={handlePress}
-        >
-        <Image source={require("../assets/user-location.png")} style={styles.myLocationIcon} />
-    </TouchableOpacity>
+        <Animated.View style={[styles.myLocationContainer, animationStyle]} >
+            <TouchableOpacity
+                style={[styles.myLocationButton]}
+                onPress={handlePress}
+            >
+                <Image source={require("../assets/user-location.png")} style={styles.myLocationIcon} />
+            </TouchableOpacity>
+    </Animated.View>
     )
 }
 
 
 const styles = StyleSheet.create({
-    myLocation: {
+    myLocationContainer: {
         alignItems: 'center',
         justifyContent: 'center',
         width: 60,
@@ -37,6 +62,11 @@ const styles = StyleSheet.create({
         bottom: 15,
         right: 15,
         height: 60,
+        elevation: 2,
+        zIndex: 2
+    },
+
+    myLocationButton: {
         backgroundColor: '#fff',
         borderRadius: 100,
         shadowColor: "#000",
@@ -46,9 +76,12 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.36,
         shadowRadius: 6.68,
-        elevation: 2,
-        zIndex: 2
+        height: 60,
+        width: 60,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
+
     myLocationIcon: {
         width: 30,
         height: 30
