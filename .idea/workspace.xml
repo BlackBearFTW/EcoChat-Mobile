@@ -5,7 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/App.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/MarkerPopup.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/MarkerPopup.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interfaces/MarkerStructureInterface.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/MarkerStructureInterface.d.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
@@ -67,7 +66,7 @@
       <workItem from="1635963112809" duration="32000" />
       <workItem from="1636013819134" duration="44217000" />
       <workItem from="1636447118151" duration="6382000" />
-      <workItem from="1636454227200" duration="16704000" />
+      <workItem from="1636454227200" duration="23663000" />
     </task>
     <servers />
   </component>

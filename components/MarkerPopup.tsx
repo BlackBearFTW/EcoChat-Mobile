@@ -6,6 +6,7 @@ import db from "../firestore"
 import {useEffect, useState} from "react";
 import {LatLng} from "react-native-maps";
 import * as Location from "expo-location";
+import Icon from 'react-native-vector-icons/Ionicons';
 
 function MarkerPopup({markerDocumentId}: {markerDocumentId: string}) {
     const [markerData, setMarkerData] = useState<MarkerStructureInterface | null>(null);
@@ -16,7 +17,7 @@ function MarkerPopup({markerDocumentId}: {markerDocumentId: string}) {
             setMarkerData(doc.data() as MarkerStructureInterface)
         });
 
-    }, []);
+    }, [markerDocumentId]);
 
     const getRouteUrl = async (coords: LatLng) => {
         const location = await Location.getCurrentPositionAsync();
@@ -34,12 +35,18 @@ function MarkerPopup({markerDocumentId}: {markerDocumentId: string}) {
                     <Text style={styles.sensorText}>{`${markerData?.sensorStatus.usbSlots.available ?? "..."}/${markerData?.sensorStatus.usbSlots.total ?? "..."}`}</Text>
                     <Text style={{...styles.sensorText, fontWeight: "bold"}}>Beschikbare USB</Text>
                 </View>
+                { markerData?.roofed &&
+                <View style={styles.sensorContainer}>
+                    {markerData?.roofed && <Icon name={"home-outline"} size={23} style={{marginBottom: -3}}/>}
+                    <Text style={{...styles.sensorText, fontWeight: "bold"}}>Overdekt</Text>
+                </View>
+                }
             </View>
             <TouchableHighlight
                 style={styles.button}
                 onPress={() => getRouteUrl(markerData?.location as LatLng).then(url => Linking.openURL(url))}
             >
-                <Text style={styles.buttonText}>Bekijk Route</Text>
+                <Text style={styles.buttonText}>Bekijk Route <Icon name={"open-outline"} size={16}/></Text>
             </TouchableHighlight>
         </Animated.View>
     );
@@ -68,22 +75,25 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: "white",
-        padding: 15,
-        fontWeight: "bold"
+        padding: 18,
+        fontWeight: "bold",
+        fontSize: 15
     },
     sensorParentContainer: {
         display: "flex",
         flexDirection: "row",
         justifyContent: "space-evenly",
-        flexGrow: 1
+        flexGrow: 1,
+        marginBottom: 35
     },
     sensorContainer: {
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "flex-end",
     },
     sensorText: {
-        fontSize: 16
+        fontSize: 15
     }
 })
+
 export default MarkerPopup;

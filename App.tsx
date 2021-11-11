@@ -93,7 +93,7 @@ export default function App() {
             <Header />
 
             {mapReady && <CurrentLocationButton mapView={mapView.current!} />}
-            {activeMarker && <MarkerPopup markerDocumentId={activeMarker!.documentId} /> }
+            {activeMarker && <MarkerPopup markerDocumentId={activeMarker.documentId} />}
         </>
     );
 }
