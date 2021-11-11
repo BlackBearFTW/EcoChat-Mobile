@@ -47,6 +47,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.36,
         shadowRadius: 6.68,
         elevation: 2,
+        zIndex: 2
     },
     myLocationIcon: {
         width: 30,

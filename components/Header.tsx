@@ -14,6 +14,7 @@ function Header() {
 const styles = StyleSheet.create({
     header: {
         elevation: 24,
+        zIndex: 24,
         position: "absolute",
         top: StatusBar.currentHeight,
         width: Dimensions.get('screen').width,

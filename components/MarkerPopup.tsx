@@ -37,7 +37,7 @@ function MarkerPopup({markerDocumentId}: {markerDocumentId: string}) {
                 </View>
                 { markerData?.roofed &&
                 <View style={styles.sensorContainer}>
-                    {markerData?.roofed && <Icon name={"home-outline"} size={23} style={{marginBottom: -3}}/>}
+                    {markerData?.roofed && <Icon name={"home-outline"} size={20} style={{marginBottom: -1}}/>}
                     <Text style={{...styles.sensorText, fontWeight: "bold"}}>Overdekt</Text>
                 </View>
                 }
@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
         height: 200,
         backgroundColor: '#fff',
         elevation: 3,
+        zIndex: 3,
         borderRadius: 16,
         padding: 15,
         display: "flex",

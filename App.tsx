@@ -102,6 +102,7 @@ const styles = StyleSheet.create({
     map: {
         width: Dimensions.get('screen').width,
         height: Dimensions.get('screen').height,
-        elevation: 1
+        elevation: 1,
+        zIndex: 3
     }
 });
