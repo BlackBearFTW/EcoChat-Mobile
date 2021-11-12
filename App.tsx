@@ -1,6 +1,6 @@
 import * as React from 'react';
-import MapView, {LatLng, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
-import {StyleSheet, Dimensions, StatusBar, Linking} from 'react-native';
+import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+import {StyleSheet, Dimensions, StatusBar} from 'react-native';
 import * as Location from 'expo-location';
 import {mapStyle} from "./assets/map-style.json";
 import {useEffect, useRef, useState} from "react";
@@ -81,9 +81,7 @@ export default function App() {
                             latitude: marker.location.latitude,
                             longitude: marker.location.longitude
                         }}
-                        onPress={event => {
-                            setActiveMarker(marker);
-                        }}
+                        onPress={() => setActiveMarker(marker)}
                         image={require("./assets/marker-icon.png")}
                         pinColor={"green"}
                     />
