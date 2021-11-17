@@ -10,21 +10,30 @@ import { getDocs, collection} from "firebase/firestore";
 import db from "./firestore";
 import MarkerPopup from "./components/MarkerPopup";
 
+
 export default function App() {
+
     const mapView = useRef<MapView>();
+
+    // Necessary States
     const [mapReady, setMapReady] = useState(false);
     const [markersData, setMarkersData] = useState<PartialMarkerInterface[]>([]);
     const [activeMarker, setActiveMarker] = useState<PartialMarkerInterface | null>(null);
 
+    // Only runs on rendering the app the first time
     useEffect(() => {
         (async () => {
+            // Styling for the statusbar
             StatusBar.setHidden(false)
             StatusBar.setBackgroundColor("#389162")
+
+            // Asking for location permission
             const {status} = await Location.requestForegroundPermissionsAsync();
 
             // TODO: Deal with users who denied location permission
             if (status !== 'granted') return;
 
+            // Getting the current user location and then animating the camera towards it
             const location = await Location.getCurrentPositionAsync();
 
             mapView.current!.animateCamera({
@@ -35,9 +44,11 @@ export default function App() {
                 zoom: 18
             }, {duration: 1000});
 
+            // Getting all the markers from firebase and storing them in the state
             const querySnapshot = await getDocs(collection(db, "markers"));
             const data: PartialMarkerInterface[] = [];
 
+            // Only store necessary data for the main app screen
             querySnapshot.forEach((doc) => {
                 const documentData = doc.data()
                 data.push({

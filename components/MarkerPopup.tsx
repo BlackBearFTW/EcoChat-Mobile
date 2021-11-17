@@ -19,11 +19,13 @@ function MarkerPopup({markerDocumentId}: {markerDocumentId: string}) {
 
     const animationStyle = useAnimatedStyle(() => ({bottom: bottomValue.value}))
 
+    // Used to animate the popup
     useEffect(() => {
         bottomValue.value = withTiming(0, {duration: 150})
     }, []);
 
 
+    // Updates the data inside the popup live when the database data changes.
     useEffect(() => {
         onSnapshot(doc(db, "markers", markerDocumentId), (doc) => {
             setMarkerData(doc.data() as MarkerStructureInterface)
@@ -31,6 +33,7 @@ function MarkerPopup({markerDocumentId}: {markerDocumentId: string}) {
 
     }, [markerDocumentId]);
 
+    // Generate url for google maps
     const getRouteUrl = async (coords: LatLng) => {
         const location = await Location.getCurrentPositionAsync();
         return `https://www.google.com/maps/dir/${location.coords.latitude},${location.coords.longitude}/${coords.latitude},${coords.longitude}`

@@ -22,12 +22,14 @@ function CurrentLocationButton({mapView, popupOpen}: {mapView: MapView, popupOpe
         }
     })
 
+    // Used to animate my location button when popup opens or closes
     useEffect(() => {
         bottomValue.value = withTiming(popupOpen ? 215 : 15, {duration: 150})
         scaleValue.value = withTiming(popupOpen ? 0.8 : 1)
     }, [popupOpen]);
 
 
+    // Animate camera towards user when button is pressed
     const handlePress = async () => {
         const location = await Location.getCurrentPositionAsync();
 
