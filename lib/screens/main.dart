@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'user/home_view.dart';
+import 'dashboard/dashboard.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
@@ -18,4 +18,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

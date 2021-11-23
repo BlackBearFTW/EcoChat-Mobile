@@ -1,7 +1,7 @@
-// import 'package:ecochat_app/net/api_methods.dart';
+// import 'package:ecochat_app/services/api_methods.dart';
 import 'package:flutter/material.dart';
 
-import 'package:ecochat_app/screens/admin/authentication.dart';
+import 'package:ecochat_app/screens/authentication/authentication.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);

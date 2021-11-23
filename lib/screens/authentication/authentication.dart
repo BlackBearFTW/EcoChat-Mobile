@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ecochat_app/net/api_methods.dart';
+import 'package:ecochat_app/services/api_methods.dart';
 
-import 'home_view.dart';
+import '../home_view/home_view.dart';
 
 class Authentication extends StatefulWidget {
   const Authentication({Key? key}) : super(key: key);
