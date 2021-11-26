@@ -6,6 +6,7 @@ class MarkerInformationBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       BottomSheet(onClosing: () => {}, builder: (context) {
+
         return Container(
             height: 200,
             width: double.infinity,
