@@ -1,5 +1,6 @@
 import 'package:ecochat_app/screens/homepage/widgets/mylocation_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
@@ -11,10 +12,8 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  final String _mapStyle =
-      '[{"featureType":"all","elementType":"all","stylers":[{"visibility":"on"}]},{"featureType":"all","elementType":"labels","stylers":[{"visibility":"on"},{"saturation":"-100"}]},{"featureType":"all","elementType":"labels.text.fill","stylers":[{"saturation":0},{"color":"#FFFFFF"},{"lightness":0},{"visibility":"true"}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#575757"},{"lightness":0}]},{"featureType":"all","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":17},{"weight":1.2}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#4d6059"}]},{"featureType":"landscape","elementType":"geometry.stroke","stylers":[{"color":"#4d6059"}]},{"featureType":"landscape.natural","elementType":"geometry.fill","stylers":[{"color":"#4d6059"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"lightness":21}]},{"featureType":"poi","elementType":"geometry.fill","stylers":[{"color":"#4d6059"}]},{"featureType":"poi","elementType":"geometry.stroke","stylers":[{"color":"#4d6059"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"on"},{"color":"#7f8d89"}]},{"featureType":"road","elementType":"geometry.fill","stylers":[{"color":"#7f8d89"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#7f8d89"},{"lightness":17}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#7f8d89"},{"lightness":29},{"weight":0.2}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":18}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#7f8d89"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#7f8d89"}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":16}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"#7f8d89"}]},{"featureType":"road.local","elementType":"geometry.stroke","stylers":[{"color":"#7f8d89"}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":19}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#2b3638"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#2b3638"},{"lightness":17}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#24282b"}]},{"featureType":"water","elementType":"geometry.stroke","stylers":[{"color":"#24282b"}]},{"featureType":"water","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels.text.stroke","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels.icon","stylers":[{"visibility":"off"}]}]';
-  late GoogleMapController mapController;
-  late Location locationHandler;
+  GoogleMapController? _mapController;
+  final Location _locationHandler = Location();
   bool locationPermissionAllowed = false;
 
   @override
@@ -25,19 +24,19 @@ class _HomeViewState extends State<HomeView> {
     super.initState();
   }
 
-  void _onGoogleMapLoad(GoogleMapController controller) {
-    mapController = controller;
+  void _onGoogleMapLoad(GoogleMapController controller) async {
+    _mapController = controller;
+    String _mapStyle = await rootBundle.loadString('assets/map_style.txt');
     controller.setMapStyle(_mapStyle);
   }
 
   Future<bool> _askForLocationPermission() async {
-    locationHandler = Location();
-    await locationHandler.requestService();
+    await _locationHandler.requestService();
 
-    if (await locationHandler.hasPermission() == PermissionStatus.granted) return true;
-    if (await locationHandler.hasPermission() == PermissionStatus.deniedForever) return false;
+    if (await _locationHandler.hasPermission() == PermissionStatus.granted) return true;
+    if (await _locationHandler.hasPermission() == PermissionStatus.deniedForever) return false;
 
-    PermissionStatus status = await locationHandler.requestPermission();
+    PermissionStatus status = await _locationHandler.requestPermission();
     return status == PermissionStatus.granted;
   }
 
@@ -56,9 +55,14 @@ class _HomeViewState extends State<HomeView> {
         minMaxZoomPreference: const MinMaxZoomPreference(8, 18),
         myLocationEnabled: true,
         compassEnabled: false,
+        tiltGesturesEnabled: false,
         onMapCreated: _onGoogleMapLoad,
       ),
-      floatingActionButton: MyLocationButton(disabled: locationPermissionAllowed),
+      floatingActionButton: _mapController != null ? MyLocationButton(
+        disabled: locationPermissionAllowed,
+        googleMapController: _mapController!,
+        locationHandler: _locationHandler,
+      ) : null,
     );
   }
 }
