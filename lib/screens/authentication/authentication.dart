@@ -5,7 +5,8 @@ import 'package:ecochat_app/services/api_methods.dart';
 import '../homepage/homepage.dart';
 
 class Authentication extends StatefulWidget {
-  const Authentication({Key? key}) : super(key: key);
+  // const Authentication({Key? key}) : super(key: key);
+  const Authentication({Key key}) : super(key: key);
 
   @override
   _AuthenticationState createState() => _AuthenticationState();

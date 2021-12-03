@@ -1,3 +1,32 @@
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+
+Future<String> getMarkers() async {
+  try {
+    var response = await http.get(Uri.parse("https://i496018core.venus.fhict.nl/api/Markers/"));
+    var json = jsonDecode(response.body);
+    var value = json['location'].toString();
+    return value;
+  } catch (e) {
+    print(e.toString());
+    return "NaN";
+  }
+}
+
+Future<String> getMarker(String id) async {
+  try {
+    var response = await http.get(Uri.parse("https://i496018core.venus.fhict.nl/api/Markers/" + id));
+    var json = jsonDecode(response.body);
+    var value = json['location'].toString();
+    return value;
+  } catch (e) {
+    print(e.toString());
+    return "NaN";
+  }
+}
+
+
 Future<bool> signIn(String email, String password) async {
   //TODO send signIn to api
 
