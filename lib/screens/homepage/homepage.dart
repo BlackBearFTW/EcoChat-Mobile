@@ -46,14 +46,14 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("ECOCHAT",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("ECOCHAT", style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xff33835c),
       ),
       body: GoogleMap(
         initialCameraPosition: const CameraPosition(target: LatLng(51, 5), zoom: 14.4746),
         zoomControlsEnabled: false,
         myLocationButtonEnabled: false,
+        minMaxZoomPreference: const MinMaxZoomPreference(8, 18),
         myLocationEnabled: true,
         compassEnabled: false,
         onMapCreated: _onGoogleMapLoad,
