@@ -35,6 +35,7 @@ dependencies:
   http: "0.13.3"
   signalr_client: any
   flutter_guid: 0.2.0
+  meta: ^1.7.0
 #  singalr_flutter: ^0.1.2
 #  signalr_netcore: ^1.2.3+1
 

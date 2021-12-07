@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:signalr_client/hub_connection.dart';
 import 'package:signalr_client/hub_connection_builder.dart';
 import 'package:flutter_guid/flutter_guid.dart';
+import 'package:ecochat_app/services/signal_r.dart';
 
 // import 'package:singalr_flutter/hub_connection.dart';
 // import 'package:singalr_flutter/hub_connection_builder.dart';
@@ -15,27 +16,16 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  final serverUrl = "https://i496018core.venus.fhict.nl/ecochat";
-  HubConnection hubConnection;
-  double width = 100.0, height = 100.0;
-
-  // NewMarker
-  // final markerGuid = "813bd01a-e092-437b-bbe2-b60f980818fe"; // Guid id,
-  final markerGuid = "f67e3947-8399-47a5-be34-74b0de6e3a5e"; // Guid id,
-  // final markerGuid = Guid; // Guid id,
-  final markerBool = true; // bool roofed,
-  final markerAvailableSlots = 5; // int availableSlots,
-  final markerTotalSlots = 5; // int totalSlots,
-  final markerBattery = 100; // int Battery,
-  final markerlatitude = 50.500; // string latitude,
-  final markerlongitude = 50.000; // string longitude,
-
+  final SignalRMarkers signalRMarkers = SignalRMarkers();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    initSignalR();
+
+    // print(signalRMarkers.getStatus());
+    signalRMarkers.getAllMarkers();
+    // print(signalRMarkers.getStatus());
   }
 
   @override
@@ -44,68 +34,32 @@ class _HomeViewState extends State<HomeView> {
       body: Column(
         children: [
           Container(
+            alignment: Alignment.center,
             margin: EdgeInsets.all(25),
-            child: TextButton(
-              child: const Text(
-                'get one markers',
-                style: TextStyle(fontSize: 20.0),
-              ),
-              onPressed: () async {
-                print("werkt");
-                print(hubConnection.state);
-                if (hubConnection.state == HubConnectionState.Connected) {
-                  await hubConnection.invoke("getOneMarker", args: [markerGuid]);
-                }
-              },
+            child: Text(
+                "test",
+              style: const TextStyle(fontSize: 20, color: Colors.green,),
+                // signalRMarkers.getAllMarkers().toString(),
+              // signalRMarkers.getStatus().toString(),
+              // style: signalRMarkers.getStatus() == HubConnectionState.Disconnected
+              //         ? const TextStyle(fontSize: 20, color: Colors.red,)
+              //         : const TextStyle(fontSize: 20, color: Colors.green,),
             ),
           ),
           Container(
             margin: EdgeInsets.all(25),
             child: TextButton(
-              child: const Text(
-                'get all markers',
-                style: TextStyle(fontSize: 20.0),
-              ),
-              onPressed: () async {
-                print(hubConnection.state);
-                if (hubConnection.state == HubConnectionState.Connected) {
-                  await hubConnection.invoke("getAllMarkers");
-                }
-              },
-            ),
+                child: const Text(
+                  'get all markers',
+                  style: TextStyle(fontSize: 20.0),
+                ),
+                onPressed: () {}),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          print(hubConnection.state);
-          hubConnection.state == HubConnectionState.Disconnected
-              ? await hubConnection.start()
-              : await hubConnection.stop();
-          print(hubConnection.state);
-        },
+        onPressed: () {},
       ),
     );
-  }
-
-  void initSignalR() {
-    hubConnection = HubConnectionBuilder().withUrl(serverUrl).build();
-    hubConnection.onclose((error) {
-      print(error);
-    });
-
-    hubConnection.on("receiveOneMarker", _handleReceiveOneMarker);
-    hubConnection.on("receiveAllMarkers", _handleReceiveAllMarkers);
-  }
-
-
-  _handleReceiveOneMarker(List<Object> args) {
-    print("test2");
-    print(args);
-  }
-
-  _handleReceiveAllMarkers(List<Object> args) {
-    print("test3");
-    print(args);
   }
 }
