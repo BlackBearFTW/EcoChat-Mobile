@@ -13,15 +13,29 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   GoogleMapController? _mapController;
+  BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+  final Set<Marker> _markers = {};
   final Location _locationHandler = Location();
   bool locationPermissionAllowed = false;
 
   @override
   void initState() {
-    _askForLocationPermission().then((value) => {
-      setState(() => locationPermissionAllowed = value),
-  });
+    BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(devicePixelRatio: 2.5),
+        "assets/marker-icon.png"
+    ).then((value) => markerIcon = value);
+    _markers.add(_createMarker("avgre-43er", const LatLng(51.451555623652524, 5.480393955095925)));
+    _askForLocationPermission().then((value) => setState(() => locationPermissionAllowed = value));
     super.initState();
+  }
+
+  Marker _createMarker(String id, LatLng coordinates) {
+
+    return Marker(
+        markerId: MarkerId(id),
+        position: coordinates,
+        icon: markerIcon
+    );
   }
 
   void _onGoogleMapLoad(GoogleMapController controller) async {
@@ -57,6 +71,7 @@ class _HomeViewState extends State<HomeView> {
         compassEnabled: false,
         tiltGesturesEnabled: false,
         onMapCreated: _onGoogleMapLoad,
+        markers: _markers,
       ),
       floatingActionButton: _mapController != null ? MyLocationButton(
         disabled: locationPermissionAllowed,
