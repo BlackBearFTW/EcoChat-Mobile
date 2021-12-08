@@ -5,7 +5,7 @@ import 'package:ecochat_app/screens/authentication/authentication.dart';
 
 class HomeView extends StatefulWidget {
   // const HomeView({Key? key}) : super(key: key);
-  const HomeView({Key key}) : super(key: key);
+  const HomeView({Key? key}) : super(key: key);
 
   @override
   _HomeViewState createState() => _HomeViewState();

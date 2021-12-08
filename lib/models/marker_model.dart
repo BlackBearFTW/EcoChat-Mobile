@@ -1,9 +1,9 @@
 class MarkerModel {
-  String id;
-  bool roofed;
-  double latitude;
-  double longitude;
-  int batteryLevel;
-  int availableSlots;
-  int totalSlots;
+  late String id;
+  late bool roofed;
+  late double latitude;
+  late double longitude;
+  late int batteryLevel;
+  late int availableSlots;
+  late int totalSlots;
 }
