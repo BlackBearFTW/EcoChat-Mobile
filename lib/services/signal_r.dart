@@ -5,6 +5,7 @@ import 'package:signalr_netcore/hub_connection_builder.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 import 'package:meta/meta.dart';
 import 'package:ecochat_app/models/marker_model.dart';
+import 'dart:convert';
 
 abstract class SignalR {
   String serverUrl = "https://i496018core.venus.fhict.nl/";
@@ -46,10 +47,23 @@ class SignalRMarkers extends SignalR {
   //   return marker;
   // }
 
+  Future<MarkerModel?> getOneMarker(String markerGuid) async {
+    HubConnection? _hubConnection = _getConnection();
+    MarkerModel? marker;
+    await _hubConnection?.invoke("GetOneMarker", args: [markerGuid]);
+
+    _hubConnection?.on("receiveOneMarker", (List<Object>? args) => {
+      marker = args?.first as MarkerModel
+    });
+
+
+    return marker;
+  }
+
   Future<List<MarkerModel>?> getAllMarkers() async {
     HubConnection? _hubConnection = _getConnection();
     List<MarkerModel>? markers;
-    await _hubConnection?.invoke("getAllMarkers");
+    await _hubConnection?.invoke("GetAllMarkers");
 
     // TODO: Fix mapping response body to markerModel
     _hubConnection?.on("receiveAllMarkers", (List<Object>? args) => print(args));

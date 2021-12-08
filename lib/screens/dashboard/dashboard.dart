@@ -1,4 +1,5 @@
 // import 'package:ecochat_app/services/api_methods.dart';
+import 'package:ecochat_app/models/marker_model.dart';
 import 'package:flutter/material.dart';
 import 'package:ecochat_app/services/signal_r.dart';
 import 'package:signalr_netcore/hub_connection.dart';
@@ -49,13 +50,9 @@ class _HomeViewState extends State<HomeView> {
                 style: TextStyle(fontSize: 20.0),
               ),
               onPressed: () async {
-                print("werkt");
-                print(_hubConnection?.state);
-                if (_hubConnection?.state == HubConnectionState.Connected) {
-                  await _hubConnection
-                      ?.invoke("getOneMarker", args: [markerGuid]);
-                }
-              },
+               MarkerModel? marker =  await signalRMarkers.getOneMarker("813bd01a-e092-437b-bbe2-b60f980818fe");
+               print(marker);
+                },
             ),
           ),
           Container(
