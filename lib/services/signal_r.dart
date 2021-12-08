@@ -13,7 +13,7 @@ abstract class SignalR {
   HubConnection? _hubConnection;
 
   SignalR(String hubName) {
-    _hubConnection = HubConnectionBuilder().withUrl(serverUrl + "ecochat").build();
+    _hubConnection = HubConnectionBuilder().withUrl(serverUrl + hubName).build();
     _hubConnection?.onclose(({Exception? error}) => print(error));
   }
 
@@ -30,7 +30,7 @@ abstract class SignalR {
 
   HubConnection? _getConnection() => _hubConnection;
 
-  HubConnectionState? _getStatus() => _hubConnection?.state;
+  HubConnectionState? getStatus() => _hubConnection?.state;
 }
 
 class SignalRMarkers extends SignalR {
@@ -46,9 +46,14 @@ class SignalRMarkers extends SignalR {
   //   return marker;
   // }
 
-  Future<void> getAllMarkers() async {
+  Future<List<MarkerModel>?> getAllMarkers() async {
     HubConnection? _hubConnection = _getConnection();
+    List<MarkerModel>? markers;
     await _hubConnection?.invoke("getAllMarkers");
+
+    // TODO: Fix mapping response body to markerModel
+    _hubConnection?.on("receiveAllMarkers", (List<Object>? args) => print(args));
+    return markers;
   }
 
 // getPrintReceiveAllMarkers() => _hubConnection.on("receiveAllMarkers", (List<Object> args) => print(args));

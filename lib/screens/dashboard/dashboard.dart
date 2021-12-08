@@ -12,7 +12,7 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  final SignalRMarkers signalRMarkers = SignalRMarkers();
+  late SignalRMarkers signalRMarkers;
 
   final serverUrl = "https://i496018core.venus.fhict.nl/";
   HubConnection? _hubConnection;
@@ -26,7 +26,7 @@ class _HomeViewState extends State<HomeView> {
 
     // print(signalRMarkers.getStatus());
 
-    initSignalR();
+    signalRMarkers = SignalRMarkers();
     // signalRMarkers.initializeConnection();
     // _hubConnection?.start();
 
@@ -66,10 +66,7 @@ class _HomeViewState extends State<HomeView> {
                 style: TextStyle(fontSize: 20.0),
               ),
               onPressed: () async {
-                print(_hubConnection?.state);
-                if (_hubConnection?.state == HubConnectionState.Connected) {
-                  await _hubConnection?.invoke("getAllMarkers");
-                }
+                signalRMarkers.getAllMarkers();
               },
             ),
           ),
@@ -77,21 +74,18 @@ class _HomeViewState extends State<HomeView> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          print(_hubConnection?.state);
-          _hubConnection?.state == HubConnectionState.Disconnected
-              ? await _hubConnection?.start()
-              : await _hubConnection?.stop();
-          print(_hubConnection?.state);
+          signalRMarkers.initializeConnection();
+          print(signalRMarkers.getStatus());
         },
       ),
     );
   }
 
-  void initSignalR() {
-    _hubConnection = HubConnectionBuilder().withUrl(serverUrl + "ecochat").build();
-    _hubConnection?.onclose(({Exception? error}) => print(error));
-    _hubConnection?.on("receiveAllMarkers", (List<Object>? args) => print(args));
-  }
+  // void initSignalR() {
+  //   _hubConnection = HubConnectionBuilder().withUrl(serverUrl + "ecochat").build();
+  //   _hubConnection?.onclose(({Exception? error}) => print(error));
+  //   _hubConnection?.on("receiveAllMarkers", (List<Object>? args) => print(args));
+  // }
 
 
   handleReceiveOneMarker(List<Object> args) {
