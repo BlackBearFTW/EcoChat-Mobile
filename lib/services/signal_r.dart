@@ -14,7 +14,8 @@ abstract class SignalR {
   HubConnection? _hubConnection;
 
   SignalR(String hubName) {
-    _hubConnection = HubConnectionBuilder().withUrl(serverUrl + hubName).build();
+    _hubConnection =
+        HubConnectionBuilder().withUrl(serverUrl + hubName).build();
     _hubConnection?.onclose(({Exception? error}) => print(error));
   }
 
@@ -47,17 +48,19 @@ class SignalRMarkers extends SignalR {
   //   return marker;
   // }
 
-  Future<MarkerModel?> getOneMarker(String markerGuid) async {
+  //function gets data, when data received, runs function
+  void getOneMarker(
+      String markerGuid, void Function(MarkerModel? arguments) callBack) async {
     HubConnection? _hubConnection = _getConnection();
-    MarkerModel? marker;
     await _hubConnection?.invoke("GetOneMarker", args: [markerGuid]);
-
-    _hubConnection?.on("receiveOneMarker", (List<Object>? args) => {
-      marker = args?.first as MarkerModel
-    });
-
-
-    return marker;
+    _hubConnection?.on(
+      "receiveOneMarker",
+      (List<dynamic>? args) => {
+        callBack(
+          MarkerModel.fromJson(args?.first),
+        ),
+      },
+    );
   }
 
   Future<List<MarkerModel>?> getAllMarkers() async {
@@ -66,7 +69,8 @@ class SignalRMarkers extends SignalR {
     await _hubConnection?.invoke("GetAllMarkers");
 
     // TODO: Fix mapping response body to markerModel
-    _hubConnection?.on("receiveAllMarkers", (List<Object>? args) => print(args));
+    _hubConnection?.on(
+        "receiveAllMarkers", (List<dynamic>? args) => print(args));
     return markers;
   }
 

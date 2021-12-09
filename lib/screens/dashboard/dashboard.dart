@@ -31,7 +31,6 @@ class _HomeViewState extends State<HomeView> {
     // signalRMarkers.initializeConnection();
     // _hubConnection?.start();
 
-
     // signalRMarkers.getAllMarkers();
 
     // print(signalRMarkers.getStatus());
@@ -49,10 +48,14 @@ class _HomeViewState extends State<HomeView> {
                 'get one markers',
                 style: TextStyle(fontSize: 20.0),
               ),
-              onPressed: () async {
-               MarkerModel? marker =  await signalRMarkers.getOneMarker("813bd01a-e092-437b-bbe2-b60f980818fe");
-               print(marker);
-                },
+              onPressed: () {
+                signalRMarkers.getOneMarker(
+                    "813bd01a-e092-437b-bbe2-b60f980818fe",
+                    (MarkerModel? marker) => {
+                      print(marker?.id),
+                    },
+                );
+              },
             ),
           ),
           Container(
@@ -84,7 +87,6 @@ class _HomeViewState extends State<HomeView> {
   //   _hubConnection?.on("receiveAllMarkers", (List<Object>? args) => print(args));
   // }
 
-
   handleReceiveOneMarker(List<Object> args) {
     print("test2");
     print(args);
@@ -95,4 +97,3 @@ class _HomeViewState extends State<HomeView> {
     print(args);
   }
 }
-
