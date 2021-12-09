@@ -66,7 +66,13 @@ class _HomeViewState extends State<HomeView> {
                 style: TextStyle(fontSize: 20.0),
               ),
               onPressed: () async {
-                signalRMarkers.getAllMarkers();
+                // signalRMarkers.getAllMarkers();
+                signalRMarkers.getAllMarkers(
+                      (List<MarkerModel>? markers) => {
+                    print(markers?.elementAt(0).batteryLevel),
+
+                  },
+                );
               },
             ),
           ),
@@ -97,3 +103,4 @@ class _HomeViewState extends State<HomeView> {
     print(args);
   }
 }
+

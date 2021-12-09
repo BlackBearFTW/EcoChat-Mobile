@@ -63,16 +63,44 @@ class SignalRMarkers extends SignalR {
     );
   }
 
-  Future<List<MarkerModel>?> getAllMarkers() async {
-    HubConnection? _hubConnection = _getConnection();
-    List<MarkerModel>? markers;
-    await _hubConnection?.invoke("GetAllMarkers");
+  void getAllMarkers(void Function(List<MarkerModel>? arguments) callBack) async {
 
-    // TODO: Fix mapping response body to markerModel
-    _hubConnection?.on(
-        "receiveAllMarkers", (List<dynamic>? args) => print(args));
-    return markers;
+    HubConnection? _hubConnection = _getConnection();
+    await _hubConnection?.invoke("GetAllMarkers");
+    List<MarkerModel> markers = [];
+    _hubConnection?.on("receiveAllMarkers",(List<dynamic>? args) => {
+        args?.first.forEach(
+          (item) => markers.add(MarkerModel.fromJson(item)),
+        ),
+        callBack(markers),
+        markers.clear(),
+      },
+    );
   }
+
+// void getAllMarkers(
+//     void Function(List<MarkerModel>? arguments) callBack) async {
+//   var map2 = [];
+//   HubConnection? _hubConnection = _getConnection();
+//   await _hubConnection?.invoke("GetAllMarkers");
+//
+//   // _hubConnection?.on("receiveAllMarkers",(List<dynamic>? args) => print(args),
+//   _hubConnection?.on(
+//     "receiveAllMarkers",
+//     (List<dynamic>? args) => {
+//       args?.asMap().map(
+//         (key, value) {
+//           value.forEach((args) => map2[args?.id] = args?.id);
+//           print(map2);
+//           return map2;
+//         },
+//       ),
+//       // callBack(
+//       // args?.map((e) => MarkerModel?.fromJson(e)).toList(),
+//       // ),
+//     },
+//   );
+// }
 
 // getPrintReceiveAllMarkers() => _hubConnection.on("receiveAllMarkers", (List<Object> args) => print(args));
 
