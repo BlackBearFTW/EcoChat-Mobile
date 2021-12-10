@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:ecochat_app/screens/homepage/widgets/mylocation_button.dart';
+import 'package:ecochat_app/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -19,7 +22,6 @@ class _HomeViewState extends State<HomeView> {
   late BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
   final Set<Marker> _markers = {};
 
-
   @override
   void initState() {
     _loadCustomMarkerIcon();
@@ -29,20 +31,15 @@ class _HomeViewState extends State<HomeView> {
   }
 
   void _loadCustomMarkerIcon() async {
-    BitmapDescriptor _customMarker = await BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(devicePixelRatio: 2.5),
-        "assets/marker-icon.png"
-    );
-
-    setState(()  {
-      markerIcon = _customMarker;
-    });
+    final Uint8List byteData = await ImageUtils.getBytesFromAsset("assets/marker-icon.png", 150);
+    setState(()  => markerIcon = BitmapDescriptor.fromBytes(byteData));
   }
 
   Marker _createMarker(String id, LatLng coordinates) => Marker(
       markerId: MarkerId(id),
       position: coordinates,
-      icon: markerIcon
+      icon: markerIcon,
+      onTap: () =>  _showMarkerBottomSheet(id),
   );
 
   void _onGoogleMapLoad(GoogleMapController controller) async {
@@ -96,19 +93,28 @@ class _HomeViewState extends State<HomeView> {
       ) : null,
     );
   }
+
+  void _showMarkerBottomSheet(String _markerId) {
+
+    // Get marker
+
+    showModalBottomSheet(
+        barrierColor: Colors.white.withOpacity(0),
+        backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16)),
+        ),
+        context: context,
+        builder: (BuildContext context) => SizedBox(
+          height: MediaQuery.of(context).size.height * 0.25,
+          child: Center(
+              child: Text(_markerId),
+        ),
+      )
+    );
+
+  }
 }
 
-// showModalBottomSheet(
-//     barrierColor: Colors.white.withOpacity(0),
-//     backgroundColor: Colors.red,
-//     shape: const RoundedRectangleBorder(
-//       borderRadius: BorderRadius.only(
-//           topLeft: Radius.circular(16),
-//           topRight: Radius.circular(16)),
-//     ),
-//     context: context,
-//     builder: (BuildContext context) => SizedBox(
-//           height: MediaQuery.of(context).size.height * 0.25,
-//           child: const Center(
-//               child: Text('This is a modal bottom sheet')),
-//         ))
