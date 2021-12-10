@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:ecochat_app/screens/homepage/widgets/mylocation_button.dart';
 import 'package:ecochat_app/utils/image_utils.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +19,7 @@ class _HomeViewState extends State<HomeView> {
   bool locationPermissionAllowed = false;
 
   GoogleMapController? _mapController;
-  late BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
   final Set<Marker> _markers = {};
 
   @override
