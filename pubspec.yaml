@@ -30,10 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: "0.13.3"
-  flutter_guid: 0.2.0
   meta: ^1.7.0
-  logging: ^1.0.2
   signalr_netcore: 1.2.3
 
 
