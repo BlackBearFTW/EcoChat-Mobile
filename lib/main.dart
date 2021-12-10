@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'dashboard/dashboard.dart';
+import 'screens/dashboard/dashboard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

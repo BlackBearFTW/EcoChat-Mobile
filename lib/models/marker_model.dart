@@ -9,6 +9,7 @@ class MarkerModel {
 
   MarkerModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    roofed = json['roofed'];
     latitude = json['latitude'];
     longitude = json['longitude'];
     batteryLevel = json['batteryLevel'];
