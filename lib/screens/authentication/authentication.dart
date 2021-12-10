@@ -15,11 +15,7 @@ class AuthenticationView extends StatefulWidget {
 class _AuthenticationViewState extends State<AuthenticationView> {
   final TextEditingController _emailField = TextEditingController();
   final TextEditingController _passwordField = TextEditingController();
-<<<<<<< HEAD
   late MarkersAPI markersAPI;
-=======
-  // late MarkersAPI markersAPI;
->>>>>>> origin/main
 
   @override
   Widget build(BuildContext context) {
@@ -79,12 +75,7 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                 ),
                 child: MaterialButton(
                   onPressed: () async {
-<<<<<<< HEAD
-                    bool shouldNavigate =
-                    await markersAPI.register(_emailField.text, _passwordField.text);
-=======
-                    // bool shouldNavigate = await markersAPI.register(_emailField.text, _passwordField.text);
->>>>>>> origin/main
+                    bool shouldNavigate = await markersAPI.register(_emailField.text, _passwordField.text);
                     if (shouldNavigate) {
                       Navigator.push(
                         context,
@@ -107,12 +98,7 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                 ),
                 child: MaterialButton(
                   onPressed: () async {
-<<<<<<< HEAD
-                    bool shouldNavigate =
-                    await markersAPI.signIn(_emailField.text, _passwordField.text);
-=======
-                    // bool shouldNavigate = await markersAPI.signIn(_emailField.text, _passwordField.text);
->>>>>>> origin/main
+                    bool shouldNavigate = await markersAPI.signIn(_emailField.text, _passwordField.text);
                     if (shouldNavigate) {
                       Navigator.push(
                         context,

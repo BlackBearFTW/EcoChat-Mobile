@@ -66,15 +66,12 @@ class _DashboardViewState extends State<DashboardView> {
               },
             ),
           ),
-<<<<<<< HEAD
-=======
           Container(
             margin: EdgeInsets.all(25),
             child:  (1 == 1)
                       ? Text("test1")
                       : null,
           ),
->>>>>>> origin/main
         ],
       ),
       floatingActionButton: FloatingActionButton(
