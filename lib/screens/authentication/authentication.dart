@@ -1,20 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ecochat_app/services/api_methods.dart';
+import 'package:ecochat_app/services/markers_api.dart';
 
 import '../homepage/homepage.dart';
 
-class Authentication extends StatefulWidget {
+class AuthenticationView extends StatefulWidget {
   // const Authentication({Key? key}) : super(key: key);
-  const Authentication({Key? key}) : super(key: key);
+  const AuthenticationView({Key? key}) : super(key: key);
 
   @override
-  _AuthenticationState createState() => _AuthenticationState();
+  _AuthenticationViewState createState() => _AuthenticationViewState();
 }
 
-class _AuthenticationState extends State<Authentication> {
+class _AuthenticationViewState extends State<AuthenticationView> {
   final TextEditingController _emailField = TextEditingController();
   final TextEditingController _passwordField = TextEditingController();
+  late MarkersAPI markersAPI;
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +76,7 @@ class _AuthenticationState extends State<Authentication> {
                 child: MaterialButton(
                   onPressed: () async {
                     bool shouldNavigate =
-                    await register(_emailField.text, _passwordField.text);
+                    await markersAPI.register(_emailField.text, _passwordField.text);
                     if (shouldNavigate) {
                       Navigator.push(
                         context,
@@ -99,7 +100,7 @@ class _AuthenticationState extends State<Authentication> {
                 child: MaterialButton(
                   onPressed: () async {
                     bool shouldNavigate =
-                    await signIn(_emailField.text, _passwordField.text);
+                    await markersAPI.signIn(_emailField.text, _passwordField.text);
                     if (shouldNavigate) {
                       Navigator.push(
                         context,

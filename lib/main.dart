@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'EcoChat',
-      home: HomeView(),
+      home: DashboardView(),
     );
   }
 }

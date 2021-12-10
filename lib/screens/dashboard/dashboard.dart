@@ -2,12 +2,14 @@ import 'package:ecochat_app/models/marker_model.dart';
 import 'package:flutter/material.dart';
 import 'package:ecochat_app/services/signal_r.dart';
 
-class HomeView extends StatefulWidget {
+class DashboardView extends StatefulWidget {
+  const DashboardView({Key? key}) : super(key: key);
+
   @override
-  _HomeViewState createState() => _HomeViewState();
+  _DashboardViewState createState() => _DashboardViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _DashboardViewState extends State<DashboardView> {
   late SignalRMarkers signalRMarkers;
 
   @override
@@ -16,10 +18,12 @@ class _HomeViewState extends State<HomeView> {
     signalRMarkers = SignalRMarkers();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Admin Dashboard'),
+      ),
       body: Column(
         children: [
           Container(
@@ -62,14 +66,6 @@ class _HomeViewState extends State<HomeView> {
               },
             ),
           ),
-          Container(
-            margin: EdgeInsets.all(25),
-            child: Row(
-              children: [
-                Text("test"),
-              ],
-            ),
-          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -80,7 +76,4 @@ class _HomeViewState extends State<HomeView> {
       ),
     );
   }
-
 }
-
-

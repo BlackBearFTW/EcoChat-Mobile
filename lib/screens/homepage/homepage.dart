@@ -1,4 +1,4 @@
-// import 'package:ecochat_app/services/api_methods.dart';
+// import 'package:ecochat_app/services/markers_api.dart';
 import 'package:flutter/material.dart';
 
 import 'package:ecochat_app/screens/authentication/authentication.dart';
@@ -39,7 +39,7 @@ class _HomeViewState extends State<HomeView> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const Authentication(),
+                      builder: (context) => const AuthenticationView(),
                     ),
                   );
                 },
