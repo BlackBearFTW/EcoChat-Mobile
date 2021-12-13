@@ -35,7 +35,7 @@ class _DashboardViewState extends State<DashboardView> {
               ),
               onPressed: () {
                 signalRMarkers.getOneMarker(
-                  "813bd01a-e092-437b-bbe2-b60f980818fe",
+                  "45dff001-8ff8-4228-9bac-e610bdd6e02e",
                   (MarkerModel? marker) => {
                     print(marker?.id),
                   },
