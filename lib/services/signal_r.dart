@@ -5,7 +5,7 @@ import 'package:signalr_netcore/hub_connection_builder.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 import 'package:meta/meta.dart';
 import 'package:ecochat_app/models/marker_model.dart';
-import 'dart:convert';
+import  'dart:convert';
 
 abstract class SignalR {
   String serverUrl = "https://i496018core.venus.fhict.nl/hub/";
