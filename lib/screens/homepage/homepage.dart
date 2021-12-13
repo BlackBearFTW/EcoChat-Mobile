@@ -12,10 +12,6 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  // @override
-  // void initState() {
-  //   //  TODO Add functions..
-  // }
 
   @override
   Widget build(BuildContext context) {
