@@ -1,6 +1,6 @@
 import 'package:ecochat_app/models/marker_model.dart';
 import 'package:flutter/material.dart';
-import 'package:ecochat_app/services/signal_r.dart';
+import 'package:ecochat_app/services/markers_signalr.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({Key? key}) : super(key: key);

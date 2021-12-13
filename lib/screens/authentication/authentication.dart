@@ -1,7 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ecochat_app/services/markers_api.dart';
-
 import '../homepage/homepage.dart';
 
 class AuthenticationView extends StatefulWidget {
@@ -15,7 +13,8 @@ class AuthenticationView extends StatefulWidget {
 class _AuthenticationViewState extends State<AuthenticationView> {
   final TextEditingController _emailField = TextEditingController();
   final TextEditingController _passwordField = TextEditingController();
-  late MarkersAPI markersAPI;
+  // late MarkersAPI markersAPI;
+  final bool shouldNavigate = false;
 
   @override
   Widget build(BuildContext context) {
