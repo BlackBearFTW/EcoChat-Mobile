@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:ecochat_app/services/markers_api.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);
@@ -21,16 +22,34 @@ class _HomeViewState extends State<HomeView> {
 
   GoogleMapController? _mapController;
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
-  final Set<Marker> _markers = {};
+  Set<Marker> _markers = {};
+  final Set<Marker> _preloadMarkers = {};
   SignalRMarkers signalRMarkers = SignalRMarkers();
+  MarkersAPI markersAPI = MarkersAPI();
 
   @override
   void initState() {
     _loadCustomMarkerIcon();
-    _askForLocationPermission().then((value) =>
-        setState(() => locationPermissionAllowed = value));
+    _askForLocationPermission().then((value) {
+      setState(() => locationPermissionAllowed = value);
+    });
 
     signalRMarkers.initializeConnection();
+
+    markersAPI.getAllMarkers();
+
+    _preloadMarkers.add(_createMarker("45dff001-8ff8-4228-9bac-e610bdd6e02e", const LatLng(51.451555623652524, 5.480393955095925)));
+    //
+    //
+    // signalRMarkers.getAllMarkers((markersData) {
+    //   if (markersData == null) return;
+    //
+    //   print(markersData.first.id);
+    //
+    //   for (MarkerModel item in markersData) {
+    //     _preloadMarkers.add(_createMarker(item.id, LatLng(item.latitude, item.longitude)));
+    //   }
+    // });
 
     super.initState();
   }
@@ -54,10 +73,7 @@ class _HomeViewState extends State<HomeView> {
     String _mapStyle = await rootBundle.loadString('assets/map_style.txt');
     _mapController?.setMapStyle(_mapStyle);
 
-    setState(() {
-      _markers.add(_createMarker("45dff001-8ff8-4228-9bac-e610bdd6e02e",
-          const LatLng(51.451555623652524, 5.480393955095925)));
-    });
+    setState(() => _markers = _preloadMarkers);
 
     if (!locationPermissionAllowed) return;
     LocationData locationData = await _locationHandler.getLocation();
@@ -79,9 +95,10 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-            "ECOCHAT", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("ECOCHAT", style: TextStyle(fontWeight: FontWeight.bold)),
+        actions: [
+          IconButton(onPressed: () => null, icon: const Icon(Icons.settings))
+        ],
         backgroundColor: const Color(0xff7672FF),
       ),
       body: GoogleMap(
