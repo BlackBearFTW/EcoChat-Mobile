@@ -1,8 +1,5 @@
 import 'dart:async';
-
 import 'package:ecochat_app/abstracts/signal_r.dart';
-import 'package:signalr_netcore/hub_connection.dart';
-import 'package:signalr_netcore/signalr_client.dart';
 import 'package:ecochat_app/models/marker_model.dart';
 
 class SignalRMarkers extends SignalR {
@@ -18,17 +15,17 @@ class SignalRMarkers extends SignalR {
   }
 
 
-    Stream<List<MarkerModel>?> getAllMarkersStream(String markerGuid){
+    Stream<List<MarkerModel>?> getAllMarkersStream(){
       final streamController = StreamController<List<MarkerModel>?>();
       final _hubConnection = getConnection();
 
-      _hubConnection?.invoke("GetOneMarker", args: [markerGuid]);
-      List<MarkerModel> markers = [];
+      _hubConnection?.invoke("GetAllMarkers");
 
-      _hubConnection?.on("ReceiveOneMarker", (List<dynamic>? args) {
-        args?.first.forEach((item) => markers.add(MarkerModel.fromJson(item)));
-        streamController.add(markers);
-        markers.clear();
+      _hubConnection?.on("ReceiveAllMarkers", (List<dynamic>? args) {
+        List<MarkerModel> _markers = [];
+
+        args?.first.forEach((item) => _markers.add(MarkerModel.fromJson(item)));
+        streamController.add(_markers);
       });
 
       return streamController.stream;

@@ -17,53 +17,53 @@ class _MarkerPopupState extends State<MarkerPopup> {
   late final stream = widget.signalRMarkersInstance.getOneMarkerStream(widget.markerId);
 
   @override
-  void initState() {
-    super.initState();
-    print('State init');
-  }
-
-  @override
-  void dispose() {
-    print('State dispose');
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return StreamBuilder(stream: stream, builder: (BuildContext context, AsyncSnapshot<MarkerModel?> snapshot) {
       MarkerModel? marker = snapshot.data;
 
       return SizedBox(
         height: MediaQuery.of(context).size.height * 0.25,
-        child: Center(
-          child: snapshot.connectionState == ConnectionState.waiting || marker == null ?
-          const Text("Loading...") :
-          Column(children: [
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: snapshot.connectionState == ConnectionState.waiting || marker == null ?
+            const Text("Loading...") :
+            Column(children: [
 
-            Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
 
-              Column(children: [
-                Text("${marker.batteryLevel}%"),
-                const Text("Accu percentage"),
+                Column(children: [
+                  Text("${marker.batteryLevel}%"),
+                  const Text("Accu percentage"),
+                ]),
+
+                Column(children: [
+                  Text("${marker.availableSlots}/${marker.totalSlots}"),
+                  const Text("Beschikbare USB poorten"),
+                ]),
+
+                if (marker.roofed) Column(children: const [
+                  Icon(Icons.roofing),
+                  Text("Overdekt"),
+                ]),
+
               ]),
 
-              Column(children: [
-                Text("${marker.availableSlots}/${marker.totalSlots}"),
-                const Text("Beschikbare USB poorten"),
-              ]),
-
-              if (marker.roofed) Column(children: [
-                Text("${marker.roofed}"),
-                const Text("Overdekt"),
-              ]),
-
+              SizedBox(
+                width: double.infinity,
+                child: RawMaterialButton(
+                    child: const Text("Bekijk Route",
+                      style:  TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () {},
+                    fillColor: const Color(0xFF8CC63F),
+                ),
+              )
             ]),
 
-            ElevatedButton(onPressed: () {}, child: const Text("Bekijk Route"))
-          ]),
-
+          ),
         ),
       );
     });

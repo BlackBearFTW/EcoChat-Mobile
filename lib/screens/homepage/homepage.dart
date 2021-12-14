@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:ecochat_app/models/marker_model.dart';
 import 'package:ecochat_app/screens/homepage/widgets/marker_popup.dart';
 import 'package:ecochat_app/screens/homepage/widgets/mylocation_button.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
@@ -7,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:ecochat_app/services/markers_api.dart';
+import 'package:signalr_netcore/hub_connection.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);
@@ -19,39 +20,27 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final Location _locationHandler = Location();
   bool locationPermissionAllowed = false;
+  bool activeSignalRConnection = false;
 
   GoogleMapController? _mapController;
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
-  Set<Marker> _markers = {};
-  final Set<Marker> _preloadMarkers = {};
   SignalRMarkers signalRMarkers = SignalRMarkers();
-  MarkersAPI markersAPI = MarkersAPI();
+  late final stream = signalRMarkers.getAllMarkersStream();
 
   @override
   void initState() {
+    super.initState();
+
     _loadCustomMarkerIcon();
+
     _askForLocationPermission().then((value) {
       setState(() => locationPermissionAllowed = value);
     });
 
-    signalRMarkers.initializeConnection();
-
-    markersAPI.getAllMarkers();
-
-    _preloadMarkers.add(_createMarker("45dff001-8ff8-4228-9bac-e610bdd6e02e", const LatLng(51.451555623652524, 5.480393955095925)));
-    //
-    //
-    // signalRMarkers.getAllMarkers((markersData) {
-    //   if (markersData == null) return;
-    //
-    //   print(markersData.first.id);
-    //
-    //   for (MarkerModel item in markersData) {
-    //     _preloadMarkers.add(_createMarker(item.id, LatLng(item.latitude, item.longitude)));
-    //   }
-    // });
-
-    super.initState();
+    signalRMarkers.initializeConnection().then((value) {
+      activeSignalRConnection = signalRMarkers.getStatus() == HubConnectionState.Connected;
+      setState(() {});
+    });
   }
 
   void _loadCustomMarkerIcon() async {
@@ -69,11 +58,12 @@ class _HomeViewState extends State<HomeView> {
       );
 
   void _onGoogleMapLoad(GoogleMapController controller) async {
-    setState(() => _mapController = controller);
+    _mapController = controller;
+
+    // TODO: FIX THIS, CAUSES INFINITE REDRAWING
+    // setState(() => _mapController = controller);
     String _mapStyle = await rootBundle.loadString('assets/map_style.txt');
     _mapController?.setMapStyle(_mapStyle);
-
-    setState(() => _markers = _preloadMarkers);
 
     if (!locationPermissionAllowed) return;
     LocationData locationData = await _locationHandler.getLocation();
@@ -93,27 +83,33 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("ECOCHAT", style: TextStyle(fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(onPressed: () => null, icon: const Icon(Icons.settings))
-        ],
+        actions: [IconButton(onPressed: () => null, icon: const Icon(Icons.settings))],
         backgroundColor: const Color(0xff7672FF),
       ),
-      body: GoogleMap(
-        initialCameraPosition: const CameraPosition(
-            target: LatLng(51, 5), zoom: 8.4746),
-        zoomControlsEnabled: false,
-        myLocationButtonEnabled: false,
-        minMaxZoomPreference: const MinMaxZoomPreference(8, 18),
-        myLocationEnabled: true,
-        compassEnabled: false,
-        tiltGesturesEnabled: false,
-        onMapCreated: _onGoogleMapLoad,
-        markers: _markers,
-        mapToolbarEnabled: false,
-      ),
+      body: activeSignalRConnection ? StreamBuilder(stream: stream, builder: (BuildContext context, AsyncSnapshot<List<MarkerModel>?> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting || snapshot.data == null) return Container();
+
+        final Set<Marker> _markers = snapshot.data!.map((data) => _createMarker(data.id, LatLng(data.latitude, data.longitude))).toSet();
+
+
+        return GoogleMap(
+          initialCameraPosition: const CameraPosition(
+              target: LatLng(51, 5), zoom: 8.4746),
+          zoomControlsEnabled: false,
+          myLocationButtonEnabled: false,
+          minMaxZoomPreference: const MinMaxZoomPreference(8, 18),
+          myLocationEnabled: true,
+          compassEnabled: false,
+          tiltGesturesEnabled: false,
+          onMapCreated: _onGoogleMapLoad,
+          markers: _markers,
+          mapToolbarEnabled: false,
+        );
+      }): const Center(child: Text("Loading....")),
       floatingActionButton: _mapController != null ? MyLocationButton(
         disabled: locationPermissionAllowed,
         googleMapController: _mapController!,
