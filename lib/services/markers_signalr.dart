@@ -30,4 +30,9 @@ class SignalRMarkers extends SignalR {
 
       return streamController.stream;
     }
+
+    void leaveGroup(String markerGuid) {
+      final _hubConnection = getConnection();
+      _hubConnection?.invoke("RemoveFromGroup", args: [markerGuid]);
+    }
 }
