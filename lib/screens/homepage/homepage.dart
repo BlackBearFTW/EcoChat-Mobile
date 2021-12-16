@@ -25,8 +25,10 @@ class _HomeViewState extends State<HomeView> {
 
   final Completer<GoogleMapController> _mapController = Completer();
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor grayMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
   SignalRMarkers signalRMarkers = SignalRMarkers();
   late final stream = signalRMarkers.getAllMarkersStream();
+  Set<Polyline> _polyLines = {};
 
   @override
   void initState() {
@@ -39,45 +41,8 @@ class _HomeViewState extends State<HomeView> {
     });
 
     signalRMarkers.initializeConnection().then((value) {
-      activeSignalRConnection = signalRMarkers.getStatus() == HubConnectionState.Connected;
-      setState(() {});
+      setState(() => activeSignalRConnection = signalRMarkers.getStatus() == HubConnectionState.Connected);
     });
-  }
-
-  void _loadCustomMarkerIcon() async {
-    final Uint8List byteData =
-        await ImageUtils.getBytesFromAsset("assets/marker-icon.png", 150);
-    setState(() => markerIcon = BitmapDescriptor.fromBytes(byteData));
-  }
-
-  Marker _createMarker(String id, LatLng coordinates) => Marker(
-        markerId: MarkerId(id),
-        position: coordinates,
-        icon: markerIcon,
-        onTap: () => _showMarkerBottomSheet(id),
-      );
-
-  void _onGoogleMapLoad(GoogleMapController controller) async {
-    _mapController.complete(controller);
-
-    String _mapStyle = await rootBundle.loadString('assets/map_style.txt');
-    controller.setMapStyle(_mapStyle);
-
-    if (!locationPermissionAllowed) return;
-    LocationData locationData = await _locationHandler.getLocation();
-    controller.moveCamera(CameraUpdate.newLatLngZoom(
-        LatLng(locationData.latitude!, locationData.longitude!), 18));
-  }
-
-  Future<bool> _askForLocationPermission() async {
-    await _locationHandler.requestService();
-
-    if (await _locationHandler.hasPermission() == PermissionStatus.granted) return true;
-    if (await _locationHandler.hasPermission() ==
-        PermissionStatus.deniedForever) return false;
-
-    PermissionStatus status = await _locationHandler.requestPermission();
-    return status == PermissionStatus.granted;
   }
 
   @override
@@ -96,12 +61,11 @@ class _HomeViewState extends State<HomeView> {
               stream: stream,
               builder: (BuildContext context, AsyncSnapshot<List<MarkerModel>?> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting || snapshot.data == null) {
-                  return const Center(child: Text("Loading...."));
+                  return const Center(child: Text("Loading Map...."));
                 }
 
                 Set<Marker> _markers = snapshot.data!
-                    .map((data) => _createMarker(
-                    data.id, LatLng(data.latitude, data.longitude)))
+                    .map((data) => _createMarker(data.id, LatLng(data.latitude, data.longitude), grayedOut: data.batteryLevel < 15))
                     .toSet();
 
                 return GoogleMap(
@@ -115,10 +79,11 @@ class _HomeViewState extends State<HomeView> {
                   tiltGesturesEnabled: false,
                   onMapCreated: _onGoogleMapLoad,
                   markers: _markers,
+                  polylines: _polyLines,
                   mapToolbarEnabled: false,
                 );
               })
-          : const Center(child: Text("Loading....")),
+          : const Center(child: Text("Loading Map...")),
       floatingActionButton: FutureBuilder<GoogleMapController>(
           future: _mapController.future,
           builder: (BuildContext context, AsyncSnapshot<GoogleMapController> snapshot) {
@@ -129,12 +94,51 @@ class _HomeViewState extends State<HomeView> {
               googleMapController: snapshot.data!,
               locationHandler: _locationHandler,
             );
-
           }),
     );
   }
 
+  void _loadCustomMarkerIcon() async {
+    final Uint8List byteData = await ImageUtils.getBytesFromAsset("assets/marker-icon.png", 150);
+    final Uint8List byteDataGray = await ImageUtils.getBytesFromAsset("assets/marker-icon-gray.png", 150);
+    setState(() {
+      markerIcon = BitmapDescriptor.fromBytes(byteData);
+      grayMarkerIcon = BitmapDescriptor.fromBytes(byteDataGray);
+    });
+  }
+
+  Marker _createMarker(String id, LatLng coordinates, {bool grayedOut = false}) => Marker(
+    markerId: MarkerId(id),
+    position: coordinates,
+    icon: grayedOut ? grayMarkerIcon : markerIcon,
+    onTap: () => _showMarkerBottomSheet(id),
+  );
+
+  void _onGoogleMapLoad(GoogleMapController controller) async {
+    _mapController.complete(controller);
+
+    String _mapStyle = await rootBundle.loadString('assets/map_style.txt');
+    controller.setMapStyle(_mapStyle);
+
+    if (!locationPermissionAllowed) return;
+    LocationData locationData = await _locationHandler.getLocation();
+    controller.moveCamera(CameraUpdate.newLatLngZoom(LatLng(locationData.latitude!, locationData.longitude!), 18));
+  }
+
+  Future<bool> _askForLocationPermission() async {
+    await _locationHandler.requestService();
+
+    if (await _locationHandler.hasPermission() == PermissionStatus.granted) return true;
+    if (await _locationHandler.hasPermission() ==
+        PermissionStatus.deniedForever) return false;
+
+    PermissionStatus status = await _locationHandler.requestPermission();
+    return status == PermissionStatus.granted;
+  }
+
   void _showMarkerBottomSheet(String _markerId) {
+    setPolyLines(Set<Polyline> polyLines) => setState(() => _polyLines = polyLines);
+
     showModalBottomSheet(
             barrierColor: Colors.white.withOpacity(0),
             backgroundColor: Colors.white,
@@ -143,7 +147,11 @@ class _HomeViewState extends State<HomeView> {
                   topLeft: Radius.circular(16), topRight: Radius.circular(16)),
             ),
             context: context,
-            builder: (BuildContext context) => MarkerPopup(markerId: _markerId, signalRMarkersInstance: signalRMarkers))
-        .whenComplete(() => signalRMarkers.leaveGroup(_markerId));
+            builder: (BuildContext context) => MarkerPopup(
+                markerId: _markerId,
+                signalRMarkersInstance: signalRMarkers,
+                polyLineSetter: setPolyLines,
+            )
+    ).whenComplete(() => signalRMarkers.leaveGroup(_markerId));
   }
 }
