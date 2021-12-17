@@ -49,8 +49,7 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("EcoChat",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("EcoChat", style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
           IconButton(onPressed: () {}, icon: const Icon(Icons.settings))
         ],
@@ -60,7 +59,7 @@ class _HomeViewState extends State<HomeView> {
           ? StreamBuilder(
               stream: stream,
               builder: (BuildContext context, AsyncSnapshot<List<MarkerModel>?> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting || snapshot.data == null) {
+                if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
                   return const Center(child: Text("Loading Map...."));
                 }
 
@@ -87,7 +86,7 @@ class _HomeViewState extends State<HomeView> {
       floatingActionButton: FutureBuilder<GoogleMapController>(
           future: _mapController.future,
           builder: (BuildContext context, AsyncSnapshot<GoogleMapController> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting || snapshot.data == null) return Container();
+            if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) return Container();
 
             return MyLocationButton(
               disabled: locationPermissionAllowed,
@@ -140,7 +139,7 @@ class _HomeViewState extends State<HomeView> {
     setPolyLines(Set<Polyline> polyLines) => setState(() => _polyLines = polyLines);
 
     showModalBottomSheet(
-            barrierColor: Colors.white.withOpacity(0),
+            barrierColor: Colors.transparent,
             backgroundColor: Colors.white,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
@@ -151,6 +150,7 @@ class _HomeViewState extends State<HomeView> {
                 markerId: _markerId,
                 signalRMarkersInstance: signalRMarkers,
                 polyLineSetter: setPolyLines,
+                polyLineSet: _polyLines
             )
     ).whenComplete(() => signalRMarkers.leaveGroup(_markerId));
   }

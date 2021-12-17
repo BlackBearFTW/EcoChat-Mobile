@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:ecochat_app/models/marker_model.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
@@ -12,20 +13,25 @@ class MarkerPopup extends StatefulWidget {
   final String markerId;
   final SignalRMarkers signalRMarkersInstance;
   final Function(Set<Polyline> points) polyLineSetter;
+  final Set<Polyline> polyLineSet;
 
   const MarkerPopup({Key? key,
     required this.markerId,
     required this.signalRMarkersInstance,
-    required this.polyLineSetter}) : super(key: key);
+    required this.polyLineSetter,
+    required this.polyLineSet}) : super(key: key);
 
   @override
   _MarkerPopupState createState() => _MarkerPopupState();
 }
 
 class _MarkerPopupState extends State<MarkerPopup> {
+  final String _apiKey = "5b3ce3597851110001cf6248b22ea2ab2dac408aab2870c02246d972";
   late final stream = widget.signalRMarkersInstance.getOneMarkerStream(widget.markerId);
   bool _locationAllowed = false;
   final Location _locationHandler = Location();
+  Stream<LocationData>? locationDataStream;
+  int? travelTimeInMinutes;
 
   @override
   void initState() {
@@ -35,16 +41,21 @@ class _MarkerPopupState extends State<MarkerPopup> {
       setState(() => _locationAllowed = (value == PermissionStatus.granted));
     });
 
-    if (!_locationAllowed) return print("Location Disabled");
+    _locationHandler.changeSettings(interval: 60000, distanceFilter: 20, accuracy: LocationAccuracy.high);
+    locationDataStream = _locationHandler.onLocationChanged;
+  }
 
-    _locationHandler.onLocationChanged.listen((LocationData locationData) async {
-      print(locationData);
-     // await Future.delayed(const Duration(seconds: 10));
-    });
+  @override
+  void dispose() {
+    print("Disposing State");
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+
+    print(widget.polyLineSet);
+
     return StreamBuilder(
         stream: stream,
         builder: (BuildContext context, AsyncSnapshot<MarkerModel?> snapshot) {
@@ -83,12 +94,32 @@ class _MarkerPopupState extends State<MarkerPopup> {
                           const Text("Overdekt"),
                           Text(marker.roofed ? "Ja" : "Nee"),
                         ]),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text("Reistijd"),
-                          Text("12 min"),
-                        ]),
+                    // Row(
+                    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //     children: const [
+                    //       Text("Reistijd"),
+                    //       Text("Fix me"),
+                    //     ]),
+                    // StreamBuilder(
+                    //     stream: locationDataStream,
+                    //     builder: (BuildContext context, AsyncSnapshot<LocationData> snapshot) {
+                    //       if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) return const Text("-");
+                    //
+                    //       return FutureBuilder<int?>(
+                    //           future: getTravelTime(LatLng(marker.latitude, marker.longitude)),
+                    //           builder: (BuildContext context, AsyncSnapshot<int?> snapshot) {
+                    //             if (snapshot.hasError) {
+                    //               print(snapshot.error);
+                    //               return const Text("Error");
+                    //             }
+                    //             if (!snapshot.hasData) return const Text("-");
+                    //
+                    //             print("FutureBuilder: ${snapshot.data}");
+                    //             return Text(snapshot.data.toString());
+                    //           });
+                    //
+                    //     }
+                    // ),
                     const SizedBox(height: 16),
                     SizedBox(
                       height: 48,
@@ -97,11 +128,19 @@ class _MarkerPopupState extends State<MarkerPopup> {
                         shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(8) ),
                         elevation: 0,
                         child: Text(
-                          "Bekijk Route",
+                          // FIXME Not updating text on click
+                          // Explanation: https://discord.com/channels/420324994703163402/421445316617961502/921356141131358229
+                          widget.polyLineSet.isEmpty ? "Bekijk Route" : "Stop Route",
                           style: TextStyle(color: _locationAllowed ? Colors.white : Colors.white60),
                         ),
-                        onPressed: _locationAllowed ? () => getRouteFromAPI(LatLng(marker.latitude, marker.longitude)) : null,
-                        fillColor: Color(_locationAllowed ? 0xFF8CC63F : 0xFFA6A6A6),
+                        onPressed:  () {
+                          if (!_locationAllowed) return;
+
+                          widget.polyLineSet.isEmpty ?
+                            getRouteFromAPI(LatLng(marker.latitude, marker.longitude)) :
+                              widget.polyLineSetter({});
+                        },
+                        fillColor: Color(!_locationAllowed ?  0xFFA6A6A6 : (widget.polyLineSet.isEmpty) ? 0xFF8CC63F : 0xFFc63f3f ),
                       ),
                     )
                   ]),
@@ -110,13 +149,27 @@ class _MarkerPopupState extends State<MarkerPopup> {
         });
   }
 
+  // TODO: Solve this in next sprint, gets data but doesn't update UI
+  // Future<int?> getTravelTime(LatLng destination) async {
+  //   String baseUrl = "https://api.openrouteservice.org/v2/directions/foot-walking?";
+  //   LocationData location = await _locationHandler.getLocation();
+  //
+  //   Response response = await http.get(Uri.parse(
+  //       baseUrl + "api_key=$_apiKey&start=${location.longitude},${location.latitude}&end=${destination.longitude},${destination.latitude}"
+  //   ));
+  //
+  //   if (response.statusCode != 200) return null;
+  //
+  //   var data = await jsonDecode(response.body);
+  //   return (data['features'][0]['properties']['summary']['duration'] / 60).toInt();
+  // }
+
   void getRouteFromAPI(LatLng destination) async {
-    String _key = "5b3ce3597851110001cf6248b22ea2ab2dac408aab2870c02246d972";
     String baseUrl = "https://api.openrouteservice.org/v2/directions/foot-walking?";
     LocationData location = await _locationHandler.getLocation();
 
     Response response = await http.get(Uri.parse(
-        baseUrl + "api_key=$_key&start=${location.longitude},${location.latitude}&end=${destination.longitude},${destination.latitude}"
+        baseUrl + "api_key=$_apiKey&start=${location.longitude},${location.latitude}&end=${destination.longitude},${destination.latitude}"
     ));
 
     if (response.statusCode != 200) return;
@@ -137,7 +190,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
   }
 
   Widget displayLoader() {
-    int _informationColumns = 4;
+    int _informationColumns = 3;
 
     return SkeletonLoader(
       builder: Column(
