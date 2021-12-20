@@ -1,14 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 
 class MyLocationButton extends StatefulWidget {
-  const MyLocationButton({Key? key, required this.disabled, required this.googleMapController, required this.locationHandler}) : super(key: key);
-
   final bool disabled;
   final GoogleMapController googleMapController;
-  final Location locationHandler;
+
+  const MyLocationButton({Key? key, required this.disabled, required this.googleMapController}) : super(key: key);
 
   @override
   _MyLocationButtonState createState() => _MyLocationButtonState();
@@ -28,7 +27,7 @@ class _MyLocationButtonState extends State<MyLocationButton> {
   }
 
   void _handleClick() async {
-    LocationData locationData = await widget.locationHandler.getLocation();
-    widget.googleMapController.animateCamera(CameraUpdate.newLatLngZoom(LatLng(locationData.latitude!, locationData.longitude!), 18));
+    Position locationData = await Geolocator.getCurrentPosition();
+    widget.googleMapController.animateCamera(CameraUpdate.newLatLngZoom(LatLng(locationData.latitude, locationData.longitude), 18));
   }
 }

@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:ecochat_app/models/marker_model.dart';
-import 'package:ecochat_app/screens/homepage/widgets/marker_popup.dart';
 import 'package:ecochat_app/screens/homepage/widgets/mylocation_button.dart';
+import 'package:ecochat_app/screens/homepage/widgets/marker_popup.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
 import 'package:ecochat_app/utils/image_utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:signalr_netcore/hub_connection.dart';
 
 class HomeView extends StatefulWidget {
@@ -19,7 +20,7 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  final Location _locationHandler = Location();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool locationPermissionAllowed = false;
   bool activeSignalRConnection = false;
 
@@ -29,6 +30,7 @@ class _HomeViewState extends State<HomeView> {
   SignalRMarkers signalRMarkers = SignalRMarkers();
   late final stream = signalRMarkers.getAllMarkersStream();
   Set<Polyline> _polyLines = {};
+  PersistentBottomSheetController? bottomSheetController;
 
   @override
   void initState() {
@@ -48,11 +50,13 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: const Text("EcoChat", style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
           IconButton(onPressed: () {}, icon: const Icon(Icons.settings))
         ],
+        automaticallyImplyLeading: false,
         backgroundColor: const Color(0xff7672FF),
       ),
       body: activeSignalRConnection
@@ -80,7 +84,8 @@ class _HomeViewState extends State<HomeView> {
                   markers: _markers,
                   polylines: _polyLines,
                   mapToolbarEnabled: false,
-                );
+                  onTap: (_) => _onMapPress(),
+                  );
               })
           : const Center(child: Text("Loading Map...")),
       floatingActionButton: FutureBuilder<GoogleMapController>(
@@ -91,7 +96,6 @@ class _HomeViewState extends State<HomeView> {
             return MyLocationButton(
               disabled: locationPermissionAllowed,
               googleMapController: snapshot.data!,
-              locationHandler: _locationHandler,
             );
           }),
     );
@@ -120,38 +124,44 @@ class _HomeViewState extends State<HomeView> {
     controller.setMapStyle(_mapStyle);
 
     if (!locationPermissionAllowed) return;
-    LocationData locationData = await _locationHandler.getLocation();
-    controller.moveCamera(CameraUpdate.newLatLngZoom(LatLng(locationData.latitude!, locationData.longitude!), 18));
+    Position locationData = await Geolocator.getCurrentPosition();
+    controller.moveCamera(CameraUpdate.newLatLngZoom(LatLng(locationData.latitude, locationData.longitude), 18));
+  }
+
+  void _onMapPress() async {
+    if (bottomSheetController == null) return;
+    bottomSheetController!.close();
   }
 
   Future<bool> _askForLocationPermission() async {
-    await _locationHandler.requestService();
+    if (!await Geolocator.isLocationServiceEnabled()) return false;
 
-    if (await _locationHandler.hasPermission() == PermissionStatus.granted) return true;
-    if (await _locationHandler.hasPermission() ==
-        PermissionStatus.deniedForever) return false;
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.whileInUse) return true;
+    if (permission == LocationPermission.deniedForever) return false;
 
-    PermissionStatus status = await _locationHandler.requestPermission();
-    return status == PermissionStatus.granted;
+    LocationPermission status = await Geolocator.requestPermission();
+    return [LocationPermission.always, LocationPermission.whileInUse].contains(status);
   }
 
-  void _showMarkerBottomSheet(String _markerId) {
-    setPolyLines(Set<Polyline> polyLines) => setState(() => _polyLines = polyLines);
+  void _showMarkerBottomSheet(String _markerId) async {
+    bottomSheetController = _scaffoldKey.currentState?.showBottomSheet((BuildContext context) {
+      return MarkerPopup(
+        signalRMarkersInstance: signalRMarkers,
+        markerId: _markerId,
+        polyLineSetter: (Set<Polyline> polyLines) => setState(() => _polyLines = polyLines),
+        polyLines: _polyLines
+      );
+    },
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16)
+      ),
+    ));
 
-    showModalBottomSheet(
-            barrierColor: Colors.transparent,
-            backgroundColor: Colors.white,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16), topRight: Radius.circular(16)),
-            ),
-            context: context,
-            builder: (BuildContext context) => MarkerPopup(
-                markerId: _markerId,
-                signalRMarkersInstance: signalRMarkers,
-                polyLineSetter: setPolyLines,
-                polyLineSet: _polyLines
-            )
-    ).whenComplete(() => signalRMarkers.leaveGroup(_markerId));
+    await bottomSheetController!.closed;
+    signalRMarkers.leaveGroup(_markerId);
+    bottomSheetController = null;
   }
 }
