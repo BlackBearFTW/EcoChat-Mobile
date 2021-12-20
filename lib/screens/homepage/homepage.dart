@@ -31,6 +31,7 @@ class _HomeViewState extends State<HomeView> {
   late final stream = signalRMarkers.getAllMarkersStream();
   Set<Polyline> _polyLines = {};
   PersistentBottomSheetController? bottomSheetController;
+  double _fabBottomPadding = 0;
 
   @override
   void initState() {
@@ -88,14 +89,18 @@ class _HomeViewState extends State<HomeView> {
                   );
               })
           : const Center(child: Text("Loading Map...")),
+
       floatingActionButton: FutureBuilder<GoogleMapController>(
           future: _mapController.future,
           builder: (BuildContext context, AsyncSnapshot<GoogleMapController> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) return Container();
 
-            return MyLocationButton(
-              disabled: locationPermissionAllowed,
-              googleMapController: snapshot.data!,
+            return Padding(
+              padding: EdgeInsets.only(bottom: _fabBottomPadding),
+              child: MyLocationButton(
+                disabled: locationPermissionAllowed,
+                googleMapController: snapshot.data!,
+              ),
             );
           }),
     );
@@ -145,23 +150,32 @@ class _HomeViewState extends State<HomeView> {
   }
 
   void _showMarkerBottomSheet(String _markerId) async {
+
     bottomSheetController = _scaffoldKey.currentState?.showBottomSheet((BuildContext context) {
       return MarkerPopup(
-        signalRMarkersInstance: signalRMarkers,
-        markerId: _markerId,
-        polyLineSetter: (Set<Polyline> polyLines) => setState(() => _polyLines = polyLines),
-        polyLines: _polyLines
-      );
+            signalRMarkersInstance: signalRMarkers,
+            markerId: _markerId,
+            polyLineSetter: (Set<Polyline> polyLines) => setState(() => _polyLines = polyLines),
+            polyLines: _polyLines,
+        );
     },
-    shape: const RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16),
           topRight: Radius.circular(16)
       ),
     ));
 
+    // This animates the FAB above the bottom sheet
+    await Future.delayed(const Duration(milliseconds: 120));
+    setState(() => _fabBottomPadding = 80);
+
     await bottomSheetController!.closed;
     signalRMarkers.leaveGroup(_markerId);
     bottomSheetController = null;
+
+    // This animates the FAB to its original location
+    await Future.delayed(const Duration(milliseconds: 120));
+    setState(() => _fabBottomPadding = 0);
   }
 }

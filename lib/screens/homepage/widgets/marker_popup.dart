@@ -175,7 +175,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
         });
   }
 
-  Future<int?> _getTravelTime(LatLng destination) async {
+  Future<Map<String, dynamic>?> _getData(LatLng destination) async {
     String baseUrl = "https://api.openrouteservice.org/v2/directions/foot-walking?";
     Position location = await Geolocator.getCurrentPosition();
 
@@ -185,30 +185,29 @@ class _MarkerPopupState extends State<MarkerPopup> {
 
     if (response.statusCode != 200) return null;
 
-    var data = await jsonDecode(response.body);
+    return jsonDecode(response.body);
+  }
+
+  Future<int?> _getTravelTime(LatLng destination) async {
+    Map<String, dynamic>? data = await _getData(destination);
+    if (data == null) return null;
     return (data['features'][0]['properties']['summary']['duration'] / 60).toInt();
   }
 
-    Future<Set<Polyline>?> getRouteFromAPI(LatLng destination) async {
-    String baseUrl = "https://api.openrouteservice.org/v2/directions/foot-walking?";
-    Position location = await Geolocator.getCurrentPosition();
+  Future<Set<Polyline>?> getRouteFromAPI(LatLng destination) async {
+    Map<String, dynamic>? data = await _getData(destination);
+    if (data == null) return null;
 
-    Response response = await http.get(Uri.parse(
-        baseUrl + "api_key=$_apiKey&start=${location.longitude},${location.latitude}&end=${destination.longitude},${destination.latitude}"
-    ));
-
-    if (response.statusCode != 200) return null;
-
-    var data = jsonDecode(response.body);
     List<dynamic> coordinates = data['features'][0]['geometry']['coordinates'];
 
-    List<LatLng> points = coordinates.map((point) => LatLng(point[1], point[0])).toList();
+    List<LatLng> points =
+        coordinates.map((point) => LatLng(point[1], point[0])).toList();
 
     Polyline polyLine = Polyline(
-        polylineId: const PolylineId("PolyLineId"),
-        points: points,
-        color: const Color(0xFF8CC63F),
-        width: 5,
+      polylineId: const PolylineId("PolyLineId"),
+      points: points,
+      color: const Color(0xFF8CC63F),
+      width: 5,
     );
 
     return {polyLine};
