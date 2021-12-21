@@ -37,6 +37,7 @@ dependencies:
   http: ^0.13.4
   geolocator: ^8.0.1
   skeleton_loader: ^2.0.0+4
+  battery_plus: ^2.0.2
 
 dev_dependencies:
   flutter_test:

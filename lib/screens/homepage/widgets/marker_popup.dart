@@ -50,8 +50,9 @@ class _MarkerPopupState extends State<MarkerPopup> {
   void initState() {
     super.initState();
 
-    Geolocator.checkPermission()
-        .then((value) => setState(() => locationAllowed = [LocationPermission.always, LocationPermission.whileInUse].contains(value)));
+    Geolocator.checkPermission().then((value) {
+      setState(() => locationAllowed = [LocationPermission.always, LocationPermission.whileInUse].contains(value));
+    });
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       locationSettings = AndroidSettings(

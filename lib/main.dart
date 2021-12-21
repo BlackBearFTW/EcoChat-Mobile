@@ -1,6 +1,6 @@
-import 'package:ecochat_app/screens/homepage/widgets/marker_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'screens/homepage/homepage.dart';
 
@@ -14,15 +14,45 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-
     return const MaterialApp(
       title: 'EcoChat',
-      home: HomeView(),
+      home: GlobalApp(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
+
+class GlobalApp extends StatefulWidget {
+  const GlobalApp({Key? key}) : super(key: key);
+
+  @override
+  _GlobalAppState createState() => _GlobalAppState();
+}
+
+class _GlobalAppState extends State<GlobalApp> {
+ @override
+  void initState() {
+
+   SystemChrome.setPreferredOrientations([
+     DeviceOrientation.portraitUp,
+     DeviceOrientation.portraitDown,
+   ]);
+
+    _askForLocationPermission();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const HomeView();
+  }
+
+  void _askForLocationPermission() async {
+    if (!await Geolocator.isLocationServiceEnabled()) return;
+
+    if (await Geolocator.checkPermission() != LocationPermission.denied) return;
+
+    await Geolocator.requestPermission();
+  }
+}
+
