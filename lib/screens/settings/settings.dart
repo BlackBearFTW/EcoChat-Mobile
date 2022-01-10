@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({Key? key}) : super(key: key);
@@ -9,7 +10,23 @@ class SettingsView extends StatefulWidget {
 }
 
 class _SettingsViewState extends State<SettingsView> {
-  int _batteryWarningValue = 15;
+  int _batteryWarningValue = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    getBatteryWarningLevel().then((value) => _batteryWarningValue = value);
+  }
+
+  Future<int> getBatteryWarningLevel() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getInt("batteryWarningLevel") ?? 0;
+  }
+
+  void setBatteryWarningLevel(int newBatteryLevel) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt("batteryWarningLevel", newBatteryLevel);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +47,10 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
                 Slider(
                   value: _batteryWarningValue.toDouble(),
-                  onChanged: (newValue) => setState(() => _batteryWarningValue = newValue.toInt()),
+                  onChanged: (newValue) {
+                    setBatteryWarningLevel(newValue.toInt());
+                    setState(() => _batteryWarningValue = newValue.toInt());
+                  },
                   divisions: 100,
                   min: 0,
                   max: 100,

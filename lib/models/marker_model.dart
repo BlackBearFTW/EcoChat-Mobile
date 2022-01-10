@@ -1,3 +1,6 @@
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 class MarkerModel {
   late String id;
   late String name;
@@ -20,6 +23,8 @@ class MarkerModel {
     availableSlots = json['availableSlots'];
     totalSlots = json['totalSlots'];
   }
+
+  double distanceFrom(LatLng otherCoordinates) => Geolocator.distanceBetween(latitude, longitude, otherCoordinates.latitude, otherCoordinates.longitude);
 
 }
 

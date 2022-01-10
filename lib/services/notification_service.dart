@@ -16,6 +16,7 @@ class NotificationService {
     priority: Priority.high,
     importance: Importance.high,
     onlyAlertOnce: true,
+    styleInformation: BigTextStyleInformation('')
   );
 
   Future<void> init() async {
