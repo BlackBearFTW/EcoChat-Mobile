@@ -74,15 +74,15 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                 ),
                 child: MaterialButton(
                   onPressed: () async {
-                    // bool shouldNavigate = await markersAPI.register(_emailField.text, _passwordField.text);
-                    // if (shouldNavigate) {
-                    //   Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //       builder: (context) => const HomeView(),
-                    //     ),
-                    //   );
-                    // }
+                    bool shouldNavigate = await markersAPI.register(_emailField.text, _passwordField.text);
+                    if (shouldNavigate) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeView(),
+                        ),
+                      );
+                    }
                   },
                   child: const Text("Register"),
                 ),
@@ -97,15 +97,15 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                 ),
                 child: MaterialButton(
                   onPressed: () async {
-                    // bool shouldNavigate = await markersAPI.signIn(_emailField.text, _passwordField.text);
-                    // if (shouldNavigate) {
-                    //   Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //       builder: (context) => const HomeView(),
-                    //     ),
-                    //   );
-                    // }
+                    bool shouldNavigate = await markersAPI.signIn(_emailField.text, _passwordField.text);
+                    if (shouldNavigate) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeView(),
+                        ),
+                      );
+                    }
                   },
                   child: const Text("Login"),
                 ),
