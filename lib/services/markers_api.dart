@@ -1,58 +1,62 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:ecochat_app/models/marker_model.dart';
 
+class MarkersApi {
+  String serverUrl = "https://i496018core.venus.fhict.nl/api/Markers/";
+  late Map<String, String> headers;
 
-class MarkersAPI {
-
-  Future<String> getMarkers() async {
-    try {
-      var response = await http.get(Uri.parse("https://i496018core.venus.fhict.nl/api/Markers/"));
-      var json = jsonDecode(response.body);
-      var value = json['location'].toString();
-      return value;
-    } catch (e) {
-      print(e.toString());
-      return "NaN";
-    }
+  MarkersApi(String? token) {
+    if (token == null) return;
+    headers = {
+      "Content-Type": "application/json",
+      'authorization': 'Bearer $token'
+    };
   }
 
-  Future<String> getMarker(String id) async {
-    try {
-      var response = await http.get(Uri.parse("https://i496018core.venus.fhict.nl/api/Markers/" + id));
-      var json = jsonDecode(response.body);
-      var value = json['location'].toString();
-      return value;
-    } catch (e) {
-      print(e.toString());
-      return "NaN";
-    }
+  //Gets one maker
+  Future<MarkerModel?> getMarker(String id) async {
+    http.Response response = await http.get(
+      Uri.parse(serverUrl + id),
+    );
+    if (response.statusCode != 200) return null;
+
+    return MarkerModel.fromJson(jsonDecode(response.body));
   }
 
+  //Gets all makers and puts them in a list
+  Future<List<MarkerModel>?> getAllMarkers() async {
+    http.Response response = await http.get(
+      Uri.parse(serverUrl),
+    );
+    if (response.statusCode != 200) return null;
 
-  Future<bool> signIn(String email, String password) async {
-    //TODO send signIn to api
-
-    try {
-      // TODO send request to api
-      return true;
-    } catch (e) {
-      //TODO return error to user
-      // print(e.toString());
-      return false;
-    }
+    List<MarkerModel> markers = [];
+    jsonDecode(response.body).forEach((item) => markers.add(MarkerModel.fromJson(item)));
+    return markers;
   }
 
-//not clean enough/ smooth enough for publish - but will work for now
-  Future<bool> register(String email, String password) async {
-    //TODO send register to api
+  void createMarker(MarkerModel data) async {
+    await http.post(
+      Uri.parse(serverUrl),
+      headers: headers,
+      body: json.encode(data),
+    );
+  }
 
-    try {
-      //TODO call api
-      return true;
-    } catch (e) {
-      //TODO return error to user
-      // print(e.toString());
-      return false;
-    }
+  void updateMarker(String guid, MarkerModel modifiedData) async {
+    await http.put(
+      Uri.parse(serverUrl + guid),
+      headers: headers,
+      body: json.encode(modifiedData),
+    );
+  }
+
+  void deleteMarker(String guid) async {
+    await http.delete(
+      Uri.parse(serverUrl + guid),
+      headers: headers,
+    );
+
   }
 }
