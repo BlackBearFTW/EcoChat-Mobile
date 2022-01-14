@@ -10,7 +10,8 @@ class MarkersApi {
   String serverUrl = "https://i496018core.venus.fhict.nl/api/Markers/";
   late Map<String, String> headers;
 
-  MarkersApi(String token) {
+  MarkersApi(String? token) {
+    if (token == null) return;
     headers = {
       "Content-Type": "application/json",
       'authorization': 'Bearer $token'
