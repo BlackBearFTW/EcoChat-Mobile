@@ -8,6 +8,8 @@ class MarkerModel {
   late int availableSlots;
   late int totalSlots;
 
+  MarkerModel(this.id, this.name, this.roofed, this.latitude, this.longitude, this.batteryLevel, this.availableSlots, this.totalSlots);
+
   MarkerModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
