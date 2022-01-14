@@ -1,6 +1,5 @@
 class MarkerModel {
   late String id;
-  late String name;
   late bool roofed;
   late double latitude;
   late double longitude;
@@ -10,7 +9,6 @@ class MarkerModel {
 
   MarkerModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    name = json['name'];
     roofed = json['roofed'];
     latitude = json['latitude'];
     longitude = json['longitude'];
