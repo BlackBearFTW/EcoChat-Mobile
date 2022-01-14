@@ -1,10 +1,6 @@
-import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:ecochat_app/models/marker_model.dart';
-
-import 'package:http/http.dart';
 
 class MarkersApi {
   String serverUrl = "https://i496018core.venus.fhict.nl/api/Markers/";
@@ -19,7 +15,7 @@ class MarkersApi {
   }
 
   //Gets one maker
-  getMarker(String id) async {
+  Future<MarkerModel?> getMarker(String id) async {
     http.Response response = await http.get(
       Uri.parse(serverUrl + id),
     );
@@ -48,11 +44,11 @@ class MarkersApi {
     );
   }
 
-  void updateMarker(String guid, MarkerModel putData) async {
+  void updateMarker(String guid, MarkerModel modifiedData) async {
     await http.put(
       Uri.parse(serverUrl + guid),
       headers: headers,
-      body: json.encode(putData),
+      body: json.encode(modifiedData),
     );
   }
 
