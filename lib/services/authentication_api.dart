@@ -1,8 +1,5 @@
-import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:ecochat_app/models/marker_model.dart';
 
 class AuthenticationApi {
   String serverUrlAuth = "https://i496018core.venus.fhict.nl/api/authentication";

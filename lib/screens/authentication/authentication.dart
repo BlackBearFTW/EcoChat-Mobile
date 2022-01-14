@@ -74,7 +74,7 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                 ),
                 child: MaterialButton(
                   onPressed: () async {
-                    bool shouldNavigate = await markersAPI.register(_emailField.text, _passwordField.text);
+                    // bool shouldNavigate = await markersAPI.register(_emailField.text, _passwordField.text);
                     if (shouldNavigate) {
                       Navigator.push(
                         context,
@@ -97,7 +97,7 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                 ),
                 child: MaterialButton(
                   onPressed: () async {
-                    bool shouldNavigate = await markersAPI.signIn(_emailField.text, _passwordField.text);
+                    // bool shouldNavigate = await markersAPI.signIn(_emailField.text, _passwordField.text);
                     if (shouldNavigate) {
                       Navigator.push(
                         context,

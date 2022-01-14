@@ -6,66 +6,59 @@ import 'package:ecochat_app/models/marker_model.dart';
 
 import 'package:http/http.dart';
 
- class MarkersApi {
+class MarkersApi {
   String serverUrl = "https://i496018core.venus.fhict.nl/api/Markers/";
-  String token = "";
+  late Map<String, String> headers;
 
-  MarkersApi(this.token);
-
-  getMarker(data) async {
-
-    var response = await http.get(
-      Uri.parse(serverUrl),
-    );
-
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+  MarkersApi(String token) {
+    headers = {
+      "Content-Type": "application/json",
+      'authorization': 'Bearer $token'
+    };
   }
 
-  createMarker(data) async {
+  //Gets one maker
+  getMarker(String id) async {
+    http.Response response = await http.get(
+      Uri.parse(serverUrl + id),
+    );
+    if (response.statusCode != 200) return null;
 
+    return MarkerModel.fromJson(jsonDecode(response.body));
+  }
 
-
-    var response = await http.post(
+  //Gets all makers and puts them in a list
+  Future<List<MarkerModel>?> getAllMarkers() async {
+    http.Response response = await http.get(
       Uri.parse(serverUrl),
-      headers: {
-        "Content-Type": "application/json",
-        'authorization': 'Bearer $token'
-      },
+    );
+    if (response.statusCode != 200) return null;
+
+    List<MarkerModel> markers = [];
+    jsonDecode(response.body).forEach((item) => markers.add(MarkerModel.fromJson(item)));
+    return markers;
+  }
+
+  void createMarker(MarkerModel data) async {
+    await http.post(
+      Uri.parse(serverUrl),
+      headers: headers,
       body: json.encode(data),
     );
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
   }
 
-  updateMarker(putData, guid) async {
-
-
-    var response = await http.put(
+  void updateMarker(String guid, MarkerModel putData) async {
+    await http.put(
       Uri.parse(serverUrl + guid),
-      headers: {
-        "Content-Type": "application/json",
-        'authorization': 'Bearer $token'
-      },
+      headers: headers,
       body: json.encode(putData),
     );
-
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
   }
 
-  deleteMarker(guid) async {
-
-
-    var response = await http.delete(
+  void deleteMarker(String guid) async {
+    await http.delete(
       Uri.parse(serverUrl + guid),
-      headers: {
-        "Content-Type": "application/json",
-        'authorization': 'Bearer $token'
-      },
+      headers: headers,
     );
-
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
   }
 }
