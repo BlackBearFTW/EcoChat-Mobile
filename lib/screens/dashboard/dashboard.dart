@@ -1,5 +1,6 @@
 import 'package:ecochat_app/models/marker_model.dart';
 import 'package:ecochat_app/screens/create_marker/create_marker.dart';
+import 'package:ecochat_app/services/authentication_api.dart';
 import 'package:flutter/material.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
 import 'package:ecochat_app/services/markers_api.dart';
@@ -15,8 +16,9 @@ class DashboardView extends StatefulWidget {
 var customPurple = const Color(0xff2980b9);
 
 class _DashboardViewState extends State<DashboardView> {
+  late AuthenticationApi authenticationApi;
   late SignalRMarkers signalRMarkers;
-  late MarkersAPI markersAPI;
+  late MarkersApi markersAPI;
 
   late bool _roofed;
   late String _name = "";
@@ -35,7 +37,10 @@ class _DashboardViewState extends State<DashboardView> {
       isExpanded: true,
       icon: const Icon(Icons.arrow_downward),
       elevation: 16,
-      underline: Container(height: 1,color: Colors.black38,),
+      underline: Container(
+        height: 1,
+        color: Colors.black38,
+      ),
       onChanged: (String? newValue) {
         setState(
           () {
@@ -46,7 +51,6 @@ class _DashboardViewState extends State<DashboardView> {
             } else {
               _roofed = false;
             }
-
           },
         );
       },
@@ -124,6 +128,7 @@ class _DashboardViewState extends State<DashboardView> {
       },
     );
   }
+
   Widget _buildingFormElevatedButton() {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
@@ -137,16 +142,14 @@ class _DashboardViewState extends State<DashboardView> {
           return;
         }
         _formKey.currentState!.save();
+        //dummy data
+        int _batteryLevel = 89;
+        int _availableSlots = _totalSlots;
 
-        print(_roofed);
-        print(_name);
-        print(_latitude);
-        print(_longitude);
-        print(_totalSlots);
-
-
-        markersAPI.addMapDataToApi(_roofed, _name, _latitude, _longitude, _totalSlots);
-
+        markersAPI.createMarker(
+          MarkerModel("05b87fb9-5699-4ada-9718-ae44e9aa3706", _name, _roofed, _latitude, _longitude, _batteryLevel,
+              _availableSlots, _totalSlots),
+        );
       },
     );
   }
@@ -154,8 +157,14 @@ class _DashboardViewState extends State<DashboardView> {
   @override
   void initState() {
     super.initState();
-    signalRMarkers = SignalRMarkers();
-    markersAPI = MarkersAPI();
+    SignalRMarkers signalRMarkers = SignalRMarkers();
+    authenticate();
+  }
+
+  void authenticate() async {
+    authenticationApi = AuthenticationApi();
+    String token = await authenticationApi.login("Vincent", "Vincent");
+    markersAPI = MarkersApi(token);
   }
 
   @override
@@ -168,115 +177,25 @@ class _DashboardViewState extends State<DashboardView> {
         child: Column(
           children: [
             Container(
-                margin: EdgeInsets.all(24),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      _buildingRoofedField(),
-                      _buildingNameField(),
-                      _buildingLatitudeField(),
-                      _buildingLongitudeField(),
-                      _buildingTotalSlotsField(),
-                      SizedBox(height: 100),
-                      _buildingFormElevatedButton(),
-                    ],
-                  ),
-                )),
-
-// #region old stuff
-          Container(
-            margin: EdgeInsets.all(25),
-            child: TextButton(
-              child: const Text(
-                'get one markers',
-                style: TextStyle(fontSize: 20.0),
+              margin: EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    _buildingRoofedField(),
+                    _buildingNameField(),
+                    _buildingLatitudeField(),
+                    _buildingLongitudeField(),
+                    _buildingTotalSlotsField(),
+                    SizedBox(height: 100),
+                    _buildingFormElevatedButton(),
+                  ],
+                ),
               ),
-              onPressed: () {
-                signalRMarkers.getOneMarker(
-                  "45dff001-8ff8-4228-9bac-e610bdd6e02e",
-                  (MarkerModel? marker) => {
-                    print(marker?.id),
-                  },
-                );
-              },
             ),
-          ),
-          Container(
-            margin: EdgeInsets.all(25),
-            child: TextButton(
-              child: const Text(
-                'get all markers',
-                style: TextStyle(fontSize: 20.0),
-              ),
-              onPressed: () async {
-                // signalRMarkers.getAllMarkers();
-                signalRMarkers.getAllMarkers(
-                  (List<MarkerModel>? markers) => {
-                    print(markers?.elementAt(0).id),
-                    print(markers?.elementAt(0).name),
-                    print(markers?.elementAt(0).batteryLevel),
-                    print(markers?.elementAt(0).roofed),
-                    print(markers?.elementAt(0).latitude),
-                    print(markers?.elementAt(0).longitude),
-                    print(markers?.elementAt(0).availableSlots),
-                    print(markers?.elementAt(0).totalSlots),
-                  },
-                );
-              },
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.all(25),
-            child: TextButton(
-              child: const Text(
-                'update data',
-                style: TextStyle(fontSize: 20.0),
-              ),
-              onPressed: () async {
-                markersAPI.updateData();
-                // markersAPI.getToken("joost", "joost");
-              },
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.all(25),
-            child: TextButton(
-              child: const Text(
-                'delete data',
-                style: TextStyle(fontSize: 20.0),
-              ),
-              onPressed: () async {
-                markersAPI.deleteData();
-                // markersAPI.getToken("joost", "joost");
-              },
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.all(25),
-            child: TextButton(
-              child: const Text(
-                'form',
-                style: TextStyle(fontSize: 20.0),
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const createMarker()),
-                );
-              },
-            ),
-          ),
           ],
         ),
-      ),
-//endregion
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          signalRMarkers.initializeConnection();
-          print(signalRMarkers.getStatus());
-        },
       ),
     );
   }

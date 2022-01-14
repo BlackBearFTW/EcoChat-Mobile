@@ -1,4 +1,3 @@
-import 'package:ecochat_app/abstracts/api.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:ecochat_app/models/marker_model.dart';
@@ -38,10 +37,10 @@ class MarkersApi {
   }
 
   void createMarker(MarkerModel data) async {
-    await http.post(
+    http.Response response = await http.post(
       Uri.parse(serverUrl),
       headers: headers,
-      body: json.encode(data),
+      body: json.encode(data.toJson()),
     );
   }
 
@@ -49,16 +48,14 @@ class MarkersApi {
     await http.put(
       Uri.parse(serverUrl + guid),
       headers: headers,
-      body: json.encode(modifiedData),
+      body: json.encode(modifiedData.toJson()),
     );
   }
-}
 
   void deleteMarker(String guid) async {
     await http.delete(
       Uri.parse(serverUrl + guid),
       headers: headers,
     );
-
   }
 }

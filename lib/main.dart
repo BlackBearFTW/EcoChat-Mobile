@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'screens/homepage/homepage.dart';
+import 'screens/dashboard/dashboard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +21,8 @@ class MyApp extends StatelessWidget {
 
     return const MaterialApp(
       title: 'EcoChat',
-      home: HomeView(),
+      home: DashboardView(),
+      // home: HomeView(),
       debugShowCheckedModeBanner: false,
     );
   }

@@ -21,5 +21,15 @@ class MarkerModel {
     totalSlots = json['totalSlots'];
   }
 
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "roofed": roofed,
+    "latitude": latitude,
+    "longitude": longitude,
+    "batteryLevel": batteryLevel,
+    "availableSlots": availableSlots,
+    "totalSlots": totalSlots,
+  };
 }
 
