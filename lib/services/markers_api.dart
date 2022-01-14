@@ -1,93 +1,71 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io';
+import 'package:ecochat_app/models/marker_model.dart';
 
-String serverUrl = "https://i496018core.venus.fhict.nl/api/Markers/";
+import 'package:http/http.dart';
 
-class MarkersAPI {
-  Future<String> getOneMarkers(String id) async {
-    try {
-      var response = await http.get(Uri.parse(serverUrl + id));
-      var json = jsonDecode(response.body);
-      var value = json['id'].toString();
-      return value;
-    } catch (e) {
-      print(e.toString());
-      return "NaN";
-    }
+ class MarkersApi {
+  String serverUrl = "https://i496018core.venus.fhict.nl/api/Markers/";
+  String token = "";
+
+  MarkersApi(this.token);
+
+  getMarker(data) async {
+
+    var response = await http.get(
+      Uri.parse(serverUrl),
+    );
+
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
   }
 
-  Future<String> getAllMarkers() async {
-    try {
-      var response = await http.get(Uri.parse(serverUrl));
-      var json = jsonDecode(response.body);
-      var value = json['id'].toString();
-      return value;
-    } catch (e) {
-      print(e.toString());
-      return "NaN";
-    }
+  createMarker(data) async {
+
+
+
+    var response = await http.post(
+      Uri.parse(serverUrl),
+      headers: {
+        "Content-Type": "application/json",
+        'authorization': 'Bearer $token'
+      },
+      body: json.encode(data),
+    );
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
   }
 
+  updateMarker(putData, guid) async {
 
-  getAuthToken() async {
-    try {
-      var response = await http.get(Uri.parse(serverUrl));
-      var json = jsonDecode(response.body);
-      var value = json['id'].toString();
-      return value;
-    } catch (e) {
-      print(e.toString());
-      return "NaN";
-    }
 
-    token =
+    var response = await http.put(
+      Uri.parse(serverUrl + guid),
+      headers: {
+        "Content-Type": "application/json",
+        'authorization': 'Bearer $token'
+      },
+      body: json.encode(putData),
+    );
 
-    print(token);
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
   }
 
-
-  useAuthToken() async {
-    String token = await getAuthToken();
-    final response = http.get(Uri.parse(serverUrl), headers: {
-      HttpHeaders.contentTypeHeader: "application/json",
-      HttpHeaders.authorizationHeader: "Bearer $token"
-    });
+  deleteMarker(guid) async {
 
 
-  }
+    var response = await http.delete(
+      Uri.parse(serverUrl + guid),
+      headers: {
+        "Content-Type": "application/json",
+        'authorization': 'Bearer $token'
+      },
+    );
 
-  //TODO AUTH required
-
-  // https://docs.flutter.dev/cookbook/networking/authenticated-requests
-  //post
-  //put
-  //delete
-
-  Future<bool> signIn(String email, String password) async {
-    //TODO send signIn to api
-
-    try {
-      // TODO send request to api
-      return true;
-    } catch (e) {
-      //TODO return error to user
-      // print(e.toString());
-      return false;
-    }
-  }
-
-//not clean enough/ smooth enough for publish - but will work for now
-  Future<bool> register(String email, String password) async {
-    //TODO send register to api
-
-    try {
-      //TODO call api
-      return true;
-    } catch (e) {
-      //TODO return error to user
-      // print(e.toString());
-      return false;
-    }
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
   }
 }
