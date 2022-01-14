@@ -1,4 +1,3 @@
-import 'package:ecochat_app/screens/homepage/widgets/marker_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
