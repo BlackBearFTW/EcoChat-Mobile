@@ -14,10 +14,10 @@ abstract class SignalR {
     _hubConnection?.onclose(({Exception? error}) => print(error));
   }
 
-  void initializeConnection() async {
+  Future<void> initializeConnection() async {
     if (_hubConnection?.state == HubConnectionState.Connected) return print("Already connected");
 
-    await _hubConnection?.start();
+   return await _hubConnection?.start();
   }
 
   void terminateConnection() => _hubConnection?.stop();
