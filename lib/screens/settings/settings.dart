@@ -15,7 +15,9 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   void initState() {
     super.initState();
-    getBatteryWarningLevel().then((value) => _batteryWarningValue = value);
+    getBatteryWarningLevel().then((value) {
+      setState(() => _batteryWarningValue = value);
+    });
   }
 
   Future<int> getBatteryWarningLevel() async {
