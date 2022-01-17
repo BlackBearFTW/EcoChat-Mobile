@@ -14,14 +14,18 @@ class MarkerModel {
   MarkerModel(this.id, this.name, this.roofed, this.latitude, this.longitude, this.batteryLevel, this.availableSlots, this.totalSlots);
 
   MarkerModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    roofed = json['roofed'];
-    latitude = json['latitude'];
-    longitude = json['longitude'];
-    batteryLevel = json['batteryLevel'];
-    availableSlots = json['availableSlots'];
-    totalSlots = json['totalSlots'];
+    try {
+      id = json['id'];
+      name = json['name'];
+      roofed = json['roofed'];
+      latitude = json['latitude'];
+      longitude = json['longitude'];
+      batteryLevel = json['batteryLevel'];
+      availableSlots = json['availableSlots'];
+      totalSlots = json['totalSlots'];
+    } catch (error) {
+      print(error);
+    }
   }
 
   double distanceFrom(LatLng otherCoordinates) => Geolocator.distanceBetween(latitude, longitude, otherCoordinates.latitude, otherCoordinates.longitude);
