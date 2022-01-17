@@ -1,32 +1,60 @@
-import 'package:battery_plus/battery_plus.dart';
-import 'package:ecochat_app/models/marker_model.dart';
-import 'package:ecochat_app/services/battery_service.dart';
-import 'package:ecochat_app/services/markers_signalr.dart';
+import 'package:battery_info/battery_info_plugin.dart';
+import 'package:battery_info/enums/charging_status.dart';
+import 'package:battery_info/model/android_battery_info.dart';
+import 'package:ecochat_app/services/markers_api.dart';
 import 'package:ecochat_app/services/notification_service.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
+import 'app.dart';
+import 'models/marker_model.dart';
 
-import 'screens/homepage/homepage.dart';
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  NotificationService().init();
+  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+
+  Workmanager().registerOneOffTask(
+      "4bh3uerdfhjrn4rjeudhn4rejhujrn3aksjhfiewhfjiwjfeg",
+      "Test",
+      initialDelay: Duration(minutes: 1));
+
+  runApp(const MyApp());
+}
 
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    final NotificationService _notificationService = NotificationService();
-    final _signalRMarkers = SignalRMarkers();
-    final BatteryService _batteryService = BatteryService();
+    AndroidBatteryInfo? batteryInfo = await BatteryInfoPlugin().androidBatteryInfo;
     int _minBatteryLevel = await getBatteryWarningLevel();
-    await _signalRMarkers.initializeConnection();
 
+    if (batteryInfo == null) return Future.value(false);
+
+    int _batteryLevel = batteryInfo.batteryLevel!;
+
+    if (_batteryLevel > _minBatteryLevel) return Future.value(true);
+    if ({ChargingStatus.Full, ChargingStatus.Charging}.contains(batteryInfo.chargingStatus)) return Future.value(true);
+
+    final List<MarkerModel>? markers = await MarkersApi(null).getAllMarkers();
     Position location = await Geolocator.getCurrentPosition();
-    //int batteryLevel = await _batteryService.batteryLevel;
 
-    print("BatteryLevel");
-    //print(batteryLevel);
+    if (markers == null) return Future.value(false);
 
-    await _notificationService.showNotifications("BatteryLevel $_minBatteryLevel", location.toString());
+    int? _distance = markers.fold(null, (int? total, MarkerModel current) {
+      if (current.batteryLevel == 0) return total;
+      int currentValue = current
+          .distanceFrom(LatLng(location.latitude, location.longitude))
+          .round();
+      if (total == null) return currentValue;
+      return currentValue < total ? currentValue : total;
+    });
+
+    // if (_distance != null && _distance > 600) return Future.value(true);
+
+    NotificationService().showNotifications("Lage batterij!",
+        "Je batterij is nog maar $_batteryLevel%, ga snel naar het dichtstbijzijnde EcoChat bankje hier ongeveer $_distance meter vandaan.");
+
     return Future.value(true);
   });
 }
@@ -34,105 +62,4 @@ void callbackDispatcher() {
 Future<int> getBatteryWarningLevel() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   return prefs.getInt("batteryWarningLevel") ?? 0;
-}
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  NotificationService().init();
-  Workmanager().initialize(
-      callbackDispatcher, // The top level function, aka callbackDispatcher
-      isInDebugMode: true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
-  );
-
-  Workmanager().registerOneOffTask(
-      "4bh3uerdfhjrn4rjeudhn4rejhujrn3aksjhfiewhfjiwjfeg",
-      "Test",
-      initialDelay: const Duration(minutes:  1)
-  );
-
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: GlobalApp(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
-class GlobalApp extends StatefulWidget {
-  const GlobalApp({Key? key}) : super(key: key);
-
-  @override
-  _GlobalAppState createState() => _GlobalAppState();
-}
-
-class _GlobalAppState extends State<GlobalApp> {
-  final BatteryService _batteryService = BatteryService();
-  final NotificationService _notificationService = NotificationService();
-  final _signalRMarkers = SignalRMarkers();
-  late final stream = _signalRMarkers.getAllMarkersStream();
-  late List<MarkerModel>? markers = [];
-  late BatteryState _batteryState = BatteryState.unknown;
-  int _minBatteryLevel = 0;
-
- @override
-  void initState() {
-   super.initState();
-
-   SystemChrome.setPreferredOrientations([
-     DeviceOrientation.portraitUp,
-     DeviceOrientation.portraitDown,
-   ]);
-
-   _signalRMarkers.initializeConnection().then((value) {
-     stream.listen((data) => markers = data);
-   });
-
-   // getBatteryWarningLevel().then((value) {
-   //   setState(() => _minBatteryLevel = value);
-   // });
-
-    _askForLocationPermission();
-
-   // _batteryService.onBatteryStateChanged.listen((state) => _batteryState = state);
-   //
-   // _batteryService.onBatteryLevelChanged.listen((int batteryLevel) => _handleBatteryChanges(batteryLevel));
-  }
-
-  @override
-  Widget build(BuildContext context) => const HomeView();
-
- void _handleBatteryChanges(int batteryLevel) async {
-   if (batteryLevel <= _minBatteryLevel || _batteryState == BatteryState.charging) return;
-
-   Position location = await Geolocator.getCurrentPosition();
-
-   // Gets the distance of the marker that is the closest to user
-   int? _distance = markers?.fold(null, (int? total, MarkerModel? current) {
-     int currentValue = current!.distanceFrom(LatLng(location.latitude, location.longitude)).round();
-     if (total == null) return currentValue;
-     return currentValue < total ? currentValue : total;
-   });
-
-   if (_distance != null && _distance > 600) return;
-
-   _notificationService.showNotifications(
-       "Lage batterij!",
-       "Je batterij is nog maar $_minBatteryLevel%, ga snel naar het dichtstbijzijnde EcoChat bankje ${_distance != null ? ", hier ongeveer $_distance meter vandaan." : "." }"
-   );
- }
-
-  void _askForLocationPermission() async {
-    if (!await Geolocator.isLocationServiceEnabled()) return;
-
-    if (await Geolocator.checkPermission() != LocationPermission.denied) return;
-
-    await Geolocator.requestPermission();
-  }
 }
