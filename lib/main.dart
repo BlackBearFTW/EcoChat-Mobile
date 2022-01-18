@@ -16,10 +16,11 @@ void main() async {
   NotificationService().init();
   Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
 
-  Workmanager().registerOneOffTask(
+  print("Setting up task....");
+  Workmanager().registerPeriodicTask(
       "4bh3uerdfhjrn4rjeudhn4rejhujrn3aksjhfiewhfjiwjfeg",
       "Test",
-      initialDelay: Duration(minutes: 1));
+      initialDelay: Duration(minutes: 15));
 
   runApp(const MyApp());
 }
@@ -34,7 +35,7 @@ void callbackDispatcher() {
     int _batteryLevel = batteryInfo.batteryLevel!;
 
     if (_batteryLevel > _minBatteryLevel) return Future.value(true);
-    if ({ChargingStatus.Full, ChargingStatus.Charging}.contains(batteryInfo.chargingStatus)) return Future.value(true);
+    if ([ChargingStatus.Full, ChargingStatus.Charging].contains(batteryInfo.chargingStatus)) return Future.value(true);
 
     final List<MarkerModel>? markers = await MarkersApi(null).getAllMarkers();
     Position location = await Geolocator.getCurrentPosition();
@@ -50,7 +51,7 @@ void callbackDispatcher() {
       return currentValue < total ? currentValue : total;
     });
 
-    // if (_distance != null && _distance > 600) return Future.value(true);
+    if (_distance != null && _distance > 600) return Future.value(true);
 
     NotificationService().showNotifications("Lage batterij!",
         "Je batterij is nog maar $_batteryLevel%, ga snel naar het dichtstbijzijnde EcoChat bankje hier ongeveer $_distance meter vandaan.");
