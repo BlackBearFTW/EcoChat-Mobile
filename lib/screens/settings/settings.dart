@@ -67,6 +67,22 @@ class _SettingsViewState extends State<SettingsView> {
               ],
             ),
           ),
+          const Divider(
+            thickness: 1,
+            color: Color(0xffd9d9d9),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(
+              child: Text("Login",
+                  textAlign: TextAlign.center
+              ),
+            ),
+          ),
+          const Divider(
+            thickness: 1,
+            color: Color(0xffd9d9d9),
+          ),
         ],
       ),
     );

@@ -7,17 +7,10 @@ class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _GlobalAppState();
+  State<StatefulWidget> createState() => _MyAppState();
 }
 
-class GlobalApp extends StatefulWidget {
-  const GlobalApp({Key? key}) : super(key: key);
-
-  @override
-  _GlobalAppState createState() => _GlobalAppState();
-}
-
-class _GlobalAppState extends State<GlobalApp> {
+class _MyAppState extends State<MyApp> {
  @override
   void initState() {
    super.initState();
