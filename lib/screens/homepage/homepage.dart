@@ -3,8 +3,9 @@ import 'dart:typed_data';
 import 'package:ecochat_app/models/marker_model.dart';
 import 'package:ecochat_app/screens/homepage/widgets/mylocation_button.dart';
 import 'package:ecochat_app/screens/homepage/widgets/marker_popup.dart';
+import 'package:ecochat_app/screens/settings/settings.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
-import 'package:ecochat_app/utils/image_utils.dart';
+import 'package:ecochat_app/utils/image_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +22,7 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool locationPermissionAllowed = false;
+  bool locationAllowed = false;
   bool activeSignalRConnection = false;
 
   final Completer<GoogleMapController> _mapController = Completer();
@@ -39,8 +40,8 @@ class _HomeViewState extends State<HomeView> {
 
     _loadCustomMarkerIcon();
 
-    _askForLocationPermission().then((value) {
-      setState(() => locationPermissionAllowed = value);
+    Geolocator.checkPermission().then((value) {
+      setState(() => locationAllowed = [LocationPermission.always, LocationPermission.whileInUse].contains(value));
     });
 
     signalRMarkers.initializeConnection().then((value) {
@@ -55,7 +56,12 @@ class _HomeViewState extends State<HomeView> {
       appBar: AppBar(
         title: const Text("EcoChat", style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.settings))
+          IconButton(onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsView()),
+            );
+          }, icon: const Icon(Icons.settings))
         ],
         automaticallyImplyLeading: false,
         backgroundColor: const Color(0xff7672FF),
@@ -98,7 +104,7 @@ class _HomeViewState extends State<HomeView> {
             return Padding(
               padding: EdgeInsets.only(bottom: _fabBottomPadding),
               child: MyLocationButton(
-                disabled: locationPermissionAllowed,
+                disabled: locationAllowed,
                 googleMapController: snapshot.data!,
               ),
             );
@@ -107,8 +113,8 @@ class _HomeViewState extends State<HomeView> {
   }
 
   void _loadCustomMarkerIcon() async {
-    final Uint8List byteData = await ImageUtils.getBytesFromAsset("assets/marker-icon.png", 150);
-    final Uint8List byteDataGray = await ImageUtils.getBytesFromAsset("assets/marker-icon-gray.png", 150);
+    final Uint8List byteData = await ImageUtil.getBytesFromAsset("assets/marker-icon.png", 150);
+    final Uint8List byteDataGray = await ImageUtil.getBytesFromAsset("assets/marker-icon-gray.png", 150);
     setState(() {
       markerIcon = BitmapDescriptor.fromBytes(byteData);
       grayMarkerIcon = BitmapDescriptor.fromBytes(byteDataGray);
@@ -128,7 +134,7 @@ class _HomeViewState extends State<HomeView> {
     String _mapStyle = await rootBundle.loadString('assets/map_style.txt');
     controller.setMapStyle(_mapStyle);
 
-    if (!locationPermissionAllowed) return;
+    if (!locationAllowed) return;
     Position locationData = await Geolocator.getCurrentPosition();
     controller.moveCamera(CameraUpdate.newLatLngZoom(LatLng(locationData.latitude, locationData.longitude), 18));
   }
@@ -136,17 +142,6 @@ class _HomeViewState extends State<HomeView> {
   void _onMapPress() async {
     if (bottomSheetController == null) return;
     bottomSheetController!.close();
-  }
-
-  Future<bool> _askForLocationPermission() async {
-    if (!await Geolocator.isLocationServiceEnabled()) return false;
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.whileInUse) return true;
-    if (permission == LocationPermission.deniedForever) return false;
-
-    LocationPermission status = await Geolocator.requestPermission();
-    return [LocationPermission.always, LocationPermission.whileInUse].contains(status);
   }
 
   void _showMarkerBottomSheet(String _markerId) async {
