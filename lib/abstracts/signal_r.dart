@@ -15,7 +15,7 @@ abstract class SignalR {
 
 
   Future<void> initializeConnection() async {
-    if (_hubConnection?.state == HubConnectionState.Connected) return print("Already connected");
+    if (_hubConnection?.state == HubConnectionState.Connected) return;
 
    return await _hubConnection?.start();
   }
