@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:ecochat_app/models/marker_model.dart';
+import 'package:ecochat_app/screens/dashboard/widgets/create_form.dart';
+import 'package:ecochat_app/screens/homepage/homepage.dart';
 import 'package:ecochat_app/screens/homepage/widgets/mylocation_button.dart';
 import 'package:ecochat_app/screens/dashboard/widgets/marker_popup.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
@@ -56,10 +58,16 @@ class _HomeViewState extends State<DashboardView> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text("EcoChat",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("EcoChat",style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.settings))
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomeView()),
+                );
+              },
+              icon: const Icon(Icons.arrow_back))
         ],
         automaticallyImplyLeading: false,
         backgroundColor: const Color(0xff7672FF),
@@ -112,12 +120,37 @@ class _HomeViewState extends State<DashboardView> {
               ),
             );
           }),
+      bottomNavigationBar: Container(
+        height: 60,
+        color: Colors.black12,
+        child: InkWell(
+          onTap: () => {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CreateFormView()),
+            ),
+          },
+          child: Padding(
+            padding: EdgeInsets.only(top: 8.0),
+            child: Column(
+              children: const <Widget>[
+                Icon(
+                  Icons.add_location_alt,
+                ),
+                Text('marker toevoegen'),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   void _loadCustomMarkerIcon() async {
-    final Uint8List byteData = await ImageUtil.getBytesFromAsset("assets/marker-icon.png", 150);
-    final Uint8List byteDataGray = await ImageUtil.getBytesFromAsset("assets/marker-icon-gray.png", 150);
+    final Uint8List byteData =
+        await ImageUtil.getBytesFromAsset("assets/marker-icon.png", 150);
+    final Uint8List byteDataGray =
+        await ImageUtil.getBytesFromAsset("assets/marker-icon-gray.png", 150);
     setState(() {
       markerIcon = BitmapDescriptor.fromBytes(byteData);
       grayMarkerIcon = BitmapDescriptor.fromBytes(byteDataGray);
@@ -192,4 +225,3 @@ class _HomeViewState extends State<DashboardView> {
     setState(() => _fabBottomPadding = 0.0);
   }
 }
-

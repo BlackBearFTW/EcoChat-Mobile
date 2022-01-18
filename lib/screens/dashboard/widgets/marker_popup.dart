@@ -159,6 +159,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
                       },
                     ),
                   ]),
+                  const SizedBox(height: 16),
                   _customRow("Accu percentage", "${marker.batteryLevel}%"),
                   _customRow("Vrije USB", marker.availableSlots.toString()),
                   _customRow("Overdekt", marker.roofed ? "Ja" : "Nee"),
@@ -275,7 +276,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
           _buildingLatitudeField(latitude),
           _buildingLongitudeField(longitude),
           _buildingTotalSlotsField(totalSlots),
-          SizedBox(height: 100),
+          SizedBox(height: 30),
           _buildingFormElevatedButton("Toevoegen", id),
         ],
       );
@@ -371,8 +372,6 @@ class _MarkerPopupState extends State<MarkerPopup> {
     );
   }
 
-
-
   Widget _buildingLongitudeField(String Longitude) {
     return TextFormField(
       decoration: InputDecoration(labelText: "Longitude"),
@@ -434,4 +433,3 @@ class _MarkerPopupState extends State<MarkerPopup> {
     );
   }
 }
-
