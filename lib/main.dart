@@ -15,8 +15,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   NotificationService().init();
   Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
-
-  print("Setting up task....");
+  
   Workmanager().registerPeriodicTask(
       "4bh3uerdfhjrn4rjeudhn4rejhujrn3aksjhfiewhfjiwjfeg",
       "Battery Warning Check",
