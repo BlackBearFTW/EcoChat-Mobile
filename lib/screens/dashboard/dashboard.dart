@@ -1,10 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:ecochat_app/models/marker_model.dart';
-import 'package:ecochat_app/screens/dashboard/widgets/create_bottom_button.dart';
 import 'package:ecochat_app/screens/dashboard/widgets/create_form.dart';
-import 'package:ecochat_app/screens/homepage/homepage.dart';
-import 'package:ecochat_app/screens/homepage/widgets/mylocation_button.dart';
 import 'package:ecochat_app/screens/dashboard/widgets/marker_popup.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
 import 'package:ecochat_app/utils/image_util.dart';
@@ -33,9 +30,7 @@ class _DashboardViewState extends State<DashboardView> {
       BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
   SignalRMarkers signalRMarkers = SignalRMarkers();
   late final stream = signalRMarkers.getAllMarkersStream();
-  Set<Polyline> _polyLines = {};
   PersistentBottomSheetController? bottomSheetController;
-
   double _fabBottomPadding = 0;
 
   @override
@@ -88,28 +83,18 @@ class _DashboardViewState extends State<DashboardView> {
                   tiltGesturesEnabled: false,
                   onMapCreated: _onGoogleMapLoad,
                   markers: _markers,
-                  polylines: _polyLines,
                   mapToolbarEnabled: false,
-                  onTap: (_) => _onMapPress(),
+                  onTap: (_) => _closeBottomSheet(),
                 );
               })
           : const Center(child: Text("Loading Map...")),
-      floatingActionButton: FutureBuilder<GoogleMapController>(
-          future: _mapController.future,
-          builder: (BuildContext context,
-              AsyncSnapshot<GoogleMapController> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting ||
-                !snapshot.hasData) return Container();
-
-            return Padding(
-              padding: EdgeInsets.only(bottom: _fabBottomPadding),
-              child: MyLocationButton(
-                disabled: locationAllowed,
-                googleMapController: snapshot.data!,
-              ),
-            );
-          }),
-      bottomNavigationBar: const CreateBottomButton(),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add, color: Colors.black),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CreateFormView()),
+        ),
+      )
     );
   }
 
@@ -143,7 +128,7 @@ class _DashboardViewState extends State<DashboardView> {
         LatLng(locationData.latitude, locationData.longitude), 18));
   }
 
-  void _onMapPress() async {
+  void _closeBottomSheet() async {
     if (bottomSheetController == null) return;
     bottomSheetController!.close();
   }
@@ -153,7 +138,7 @@ class _DashboardViewState extends State<DashboardView> {
       return MarkerPopup(
         signalRMarkersInstance: signalRMarkers,
         markerId: _markerId,
-        closeMarkerPopup: _onMapPress,
+        closeMarkerPopup: _closeBottomSheet,
       );
     },
     shape: const RoundedRectangleBorder(

@@ -33,7 +33,6 @@ class _HomeViewState extends State<HomeView> {
   late final stream = signalRMarkers.getAllMarkersStream();
   Set<Polyline> _polyLines = {};
   PersistentBottomSheetController? bottomSheetController;
-
   double _fabBottomPadding = 0;
 
   @override

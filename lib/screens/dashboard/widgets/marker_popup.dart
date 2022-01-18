@@ -1,24 +1,21 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:ecochat_app/models/marker_model.dart';
 import 'package:ecochat_app/services/authentication_api.dart';
 import 'package:ecochat_app/services/markers_api.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
+import 'package:ecochat_app/services/route_service_api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
 import 'package:skeleton_loader/skeleton_loader.dart';
 
 class MarkerPopup extends StatefulWidget {
   final SignalRMarkers signalRMarkersInstance;
   final String markerId;
   final Function() closeMarkerPopup;
-
 
   const MarkerPopup(
       {Key? key,
@@ -38,20 +35,21 @@ class _MarkerPopupState extends State<MarkerPopup> {
   late LocationSettings locationSettings;
   bool locationAllowed = false;
   bool editingMarker = false;
+  final routeServiceApi = RouteServiceAPI();
   late AuthenticationApi authenticationApi;
-  late MarkersApi markersAPI;
+  late MarkersApi markersApi;
 
   void authenticate() async {
     authenticationApi = AuthenticationApi();
     String token = await authenticationApi.login("Vincent", "Vincent");
-    markersAPI = MarkersApi(token);
+    markersApi = MarkersApi(token);
   }
 
   late final Stream<MarkerModel?> markerStream = widget.signalRMarkersInstance.getOneMarkerStream(widget.markerId).map((markerData) {
     if (markerData != null && locationAllowed) {
       travelTimeStream = Geolocator
           .getPositionStream(locationSettings: locationSettings)
-          .asyncMap((event) async => await _getTravelTime(LatLng(markerData.latitude, markerData.longitude)));
+          .asyncMap((event) async => await routeServiceApi.getTravelTime(LatLng(markerData.latitude, markerData.longitude)));
     }
 
     return markerData;
@@ -66,24 +64,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
       setState(() => locationAllowed = [LocationPermission.always, LocationPermission.whileInUse].contains(value));
     });
 
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      locationSettings = AndroidSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 25,
-        intervalDuration: const Duration(seconds: 30),
-      );
-    } else if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
-      locationSettings = AppleSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 25,
-        pauseLocationUpdatesAutomatically: true,
-      );
-    } else {
-      locationSettings = const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 100,
-      );
-    }
+    locationSettings = getLocationSettings();
   }
 
 
@@ -146,7 +127,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
                       ),
                       child: Text("Delete"),
                       onPressed: () {
-                        markersAPI.deleteMarker(marker.id);
+                        markersApi.deleteMarker(marker.id);
                         widget.closeMarkerPopup();
                       },
                     ),
@@ -180,40 +161,28 @@ class _MarkerPopupState extends State<MarkerPopup> {
         });
   }
 
-  Future<Map<String, dynamic>?> _getData(LatLng destination) async {
-    String baseUrl = "https://api.openrouteservice.org/v2/directions/foot-walking?";
-    Position location = await Geolocator.getCurrentPosition();
+  LocationSettings getLocationSettings() {
 
-    Response response = await http.get(Uri.parse(
-        baseUrl + "api_key=$_apiKey&start=${location.longitude},${location.latitude}&end=${destination.longitude},${destination.latitude}"
-    ));
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return AndroidSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 25,
+        intervalDuration: const Duration(seconds: 30),
+      );
+    }
 
-    if (response.statusCode != 200) return null;
+    if ([TargetPlatform.iOS,  TargetPlatform.macOS].contains(defaultTargetPlatform)) {
+      return AppleSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 25,
+        pauseLocationUpdatesAutomatically: true,
+      );
+    }
 
-    return jsonDecode(response.body);
-  }
-
-  Future<int?> _getTravelTime(LatLng destination) async {
-    Map<String, dynamic>? data = await _getData(destination);
-    if (data == null) return null;
-    return (data['features'][0]['properties']['summary']['duration'] / 60).toInt();
-  }
-
-  Future<Set<Polyline>?> getRouteFromAPI(LatLng destination) async {
-    Map<String, dynamic>? data = await _getData(destination);
-    if (data == null) return null;
-
-    List<dynamic> coordinates = data['features'][0]['geometry']['coordinates'];
-    List<LatLng> points = coordinates.map((point) => LatLng(point[1], point[0])).toList();
-
-    Polyline polyLine = Polyline(
-      polylineId: const PolylineId("PolyLineId"),
-      points: points,
-      color: const Color(0xFF8CC63F),
-      width: 5,
-    );
-
-    return {polyLine};
+      return const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 100,
+      );
   }
 
   Widget _displayLoader() {
@@ -423,7 +392,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
         int _availableSlots = _totalSlots;
 
         print(MarkerModel(id, _name, _roofed, _latitude, _longitude, _batteryLevel, _availableSlots, _totalSlots));
-        markersAPI.updateMarker(id,
+        markersApi.updateMarker(id,
           MarkerModel(id, _name, _roofed, _latitude, _longitude, _batteryLevel, _availableSlots, _totalSlots),
         );
       },
