@@ -17,18 +17,15 @@ import 'package:skeleton_loader/skeleton_loader.dart';
 class MarkerPopup extends StatefulWidget {
   final SignalRMarkers signalRMarkersInstance;
   final String markerId;
-  final Function(Set<Polyline> points) polyLineSetter;
   final Function() closeMarkerPopup;
-  final Set<Polyline> polyLines;
 
 
   const MarkerPopup(
       {Key? key,
       required this.signalRMarkersInstance,
       required this.markerId,
-      required this.polyLineSetter,
       required this.closeMarkerPopup,
-      required this.polyLines})
+      })
       : super(key: key);
 
   @override
@@ -41,7 +38,6 @@ class _MarkerPopupState extends State<MarkerPopup> {
   late LocationSettings locationSettings;
   bool locationAllowed = false;
   bool editingMarker = false;
-  late Set<Polyline> _polyLines = widget.polyLines;
   late AuthenticationApi authenticationApi;
   late MarkersApi markersAPI;
 
@@ -53,12 +49,11 @@ class _MarkerPopupState extends State<MarkerPopup> {
 
   late final Stream<MarkerModel?> markerStream = widget.signalRMarkersInstance.getOneMarkerStream(widget.markerId).map((markerData) {
     if (markerData != null && locationAllowed) {
-      travelTimeStream = Geolocator.getPositionStream(locationSettings: locationSettings).asyncMap(
-        (event) async => await _getTravelTime(
-          LatLng(markerData.latitude, markerData.longitude),
-        ),
-      );
+      travelTimeStream = Geolocator
+          .getPositionStream(locationSettings: locationSettings)
+          .asyncMap((event) async => await _getTravelTime(LatLng(markerData.latitude, markerData.longitude)));
     }
+
     return markerData;
   });
 
@@ -67,11 +62,9 @@ class _MarkerPopupState extends State<MarkerPopup> {
     super.initState();
     authenticate();
 
-    Geolocator.checkPermission().then((value) => setState(() =>
-        locationAllowed = [
-          LocationPermission.always,
-          LocationPermission.whileInUse
-        ].contains(value)));
+    Geolocator.checkPermission().then((value) {
+      setState(() => locationAllowed = [LocationPermission.always, LocationPermission.whileInUse].contains(value));
+    });
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       locationSettings = AndroidSettings(
@@ -79,8 +72,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
         distanceFilter: 25,
         intervalDuration: const Duration(seconds: 30),
       );
-    } else if (defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS) {
+    } else if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
       locationSettings = AppleSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 25,
@@ -191,9 +183,13 @@ class _MarkerPopupState extends State<MarkerPopup> {
   Future<Map<String, dynamic>?> _getData(LatLng destination) async {
     String baseUrl = "https://api.openrouteservice.org/v2/directions/foot-walking?";
     Position location = await Geolocator.getCurrentPosition();
-    Response response = await http.get(Uri.parse(baseUrl + "api_key=$_apiKey&start=${location.longitude},${location.latitude}&end=${destination.longitude},${destination.latitude}"));
+
+    Response response = await http.get(Uri.parse(
+        baseUrl + "api_key=$_apiKey&start=${location.longitude},${location.latitude}&end=${destination.longitude},${destination.latitude}"
+    ));
 
     if (response.statusCode != 200) return null;
+
     return jsonDecode(response.body);
   }
 
@@ -216,6 +212,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
       color: const Color(0xFF8CC63F),
       width: 5,
     );
+
     return {polyLine};
   }
 

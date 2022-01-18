@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:ecochat_app/models/marker_model.dart';
+import 'package:ecochat_app/screens/dashboard/widgets/create_bottom_button.dart';
 import 'package:ecochat_app/screens/dashboard/widgets/create_form.dart';
 import 'package:ecochat_app/screens/homepage/homepage.dart';
 import 'package:ecochat_app/screens/homepage/widgets/mylocation_button.dart';
@@ -18,12 +19,12 @@ class DashboardView extends StatefulWidget {
   const DashboardView({Key? key}) : super(key: key);
 
   @override
-  State<DashboardView> createState() => _HomeViewState();
+  State<DashboardView> createState() => _DashboardViewState();
 }
 
-class _HomeViewState extends State<DashboardView> {
+class _DashboardViewState extends State<DashboardView> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool locationPermissionAllowed = false;
+  bool locationAllowed = false;
   bool activeSignalRConnection = false;
 
   final Completer<GoogleMapController> _mapController = Completer();
@@ -43,8 +44,8 @@ class _HomeViewState extends State<DashboardView> {
 
     _loadCustomMarkerIcon();
 
-    _askForLocationPermission().then((value) {
-      setState(() => locationPermissionAllowed = value);
+    Geolocator.checkPermission().then((value) {
+      setState(() => locationAllowed = [LocationPermission.always, LocationPermission.whileInUse].contains(value));
     });
 
     signalRMarkers.initializeConnection().then((value) {
@@ -59,17 +60,6 @@ class _HomeViewState extends State<DashboardView> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text("EcoChat",style: TextStyle(fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomeView()),
-                );
-              },
-              icon: const Icon(Icons.arrow_back))
-        ],
-        automaticallyImplyLeading: false,
         backgroundColor: const Color(0xff7672FF),
       ),
       body: activeSignalRConnection
@@ -89,8 +79,7 @@ class _HomeViewState extends State<DashboardView> {
                     .toSet();
 
                 return GoogleMap(
-                  initialCameraPosition:
-                      const CameraPosition(target: LatLng(51, 5), zoom: 8.4746),
+                  initialCameraPosition: const CameraPosition(target: LatLng(51, 5), zoom: 8.4746),
                   zoomControlsEnabled: false,
                   myLocationButtonEnabled: false,
                   minMaxZoomPreference: const MinMaxZoomPreference(8, 18),
@@ -115,42 +104,18 @@ class _HomeViewState extends State<DashboardView> {
             return Padding(
               padding: EdgeInsets.only(bottom: _fabBottomPadding),
               child: MyLocationButton(
-                disabled: locationPermissionAllowed,
+                disabled: locationAllowed,
                 googleMapController: snapshot.data!,
               ),
             );
           }),
-      bottomNavigationBar: Container(
-        height: 60,
-        color: Colors.black12,
-        child: InkWell(
-          onTap: () => {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CreateFormView()),
-            ),
-          },
-          child: Padding(
-            padding: EdgeInsets.only(top: 8.0),
-            child: Column(
-              children: const <Widget>[
-                Icon(
-                  Icons.add_location_alt,
-                ),
-                Text('marker toevoegen'),
-              ],
-            ),
-          ),
-        ),
-      ),
+      bottomNavigationBar: const CreateBottomButton(),
     );
   }
 
   void _loadCustomMarkerIcon() async {
-    final Uint8List byteData =
-        await ImageUtil.getBytesFromAsset("assets/marker-icon.png", 150);
-    final Uint8List byteDataGray =
-        await ImageUtil.getBytesFromAsset("assets/marker-icon-gray.png", 150);
+    final Uint8List byteData = await ImageUtil.getBytesFromAsset("assets/marker-icon.png", 150);
+    final Uint8List byteDataGray = await ImageUtil.getBytesFromAsset("assets/marker-icon-gray.png", 150);
     setState(() {
       markerIcon = BitmapDescriptor.fromBytes(byteData);
       grayMarkerIcon = BitmapDescriptor.fromBytes(byteDataGray);
@@ -172,7 +137,7 @@ class _HomeViewState extends State<DashboardView> {
     String _mapStyle = await rootBundle.loadString('assets/map_style.txt');
     controller.setMapStyle(_mapStyle);
 
-    if (!locationPermissionAllowed) return;
+    if (!locationAllowed) return;
     Position locationData = await Geolocator.getCurrentPosition();
     controller.moveCamera(CameraUpdate.newLatLngZoom(
         LatLng(locationData.latitude, locationData.longitude), 18));
@@ -183,34 +148,17 @@ class _HomeViewState extends State<DashboardView> {
     bottomSheetController!.close();
   }
 
-  Future<bool> _askForLocationPermission() async {
-    if (!await Geolocator.isLocationServiceEnabled()) return false;
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.whileInUse) return true;
-    if (permission == LocationPermission.deniedForever) return false;
-
-    LocationPermission status = await Geolocator.requestPermission();
-    return [LocationPermission.always, LocationPermission.whileInUse]
-        .contains(status);
-  }
-
   void _showMarkerBottomSheet(String _markerId) async {
-    bottomSheetController =
-        _scaffoldKey.currentState?.showBottomSheet((BuildContext context) {
+    bottomSheetController = _scaffoldKey.currentState?.showBottomSheet((BuildContext context) {
       return MarkerPopup(
         signalRMarkersInstance: signalRMarkers,
         markerId: _markerId,
         closeMarkerPopup: _onMapPress,
-        polyLineSetter: (Set<Polyline> polyLines) =>
-            setState(() => _polyLines = polyLines),
-        polyLines: _polyLines,
       );
     },
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16), topRight: Radius.circular(16)),
-            ));
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+    ));
 
     // This animates the FAB above the bottom sheet
     await Future.delayed(const Duration(milliseconds: 120));

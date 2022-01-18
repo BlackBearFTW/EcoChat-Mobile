@@ -4,6 +4,7 @@ import 'package:ecochat_app/models/marker_model.dart';
 
 class MarkersApi {
   String serverUrl = "https://i496018core.venus.fhict.nl/api/Markers/";
+
   late Map<String, String> headers;
 
   MarkersApi(String? token) {

@@ -156,8 +156,7 @@ class _HomeViewState extends State<HomeView> {
   }
 
   void _showMarkerBottomSheet(String _markerId) async {
-    bottomSheetController =
-        _scaffoldKey.currentState?.showBottomSheet((BuildContext context) {
+    bottomSheetController = _scaffoldKey.currentState?.showBottomSheet((BuildContext context) {
       return MarkerPopup(
         signalRMarkersInstance: signalRMarkers,
         markerId: _markerId,
@@ -166,10 +165,9 @@ class _HomeViewState extends State<HomeView> {
         polyLines: _polyLines,
       );
     },
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16), topRight: Radius.circular(16)),
-            ));
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+    ));
 
     // This animates the FAB above the bottom sheet
     await Future.delayed(const Duration(milliseconds: 120));

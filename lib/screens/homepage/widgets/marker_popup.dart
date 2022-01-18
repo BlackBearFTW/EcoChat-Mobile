@@ -44,8 +44,8 @@ class _MarkerPopupState extends State<MarkerPopup> {
     }
 
     return markerData;
-   });
-  
+  });
+
   @override
   void initState() {
     super.initState();
@@ -71,7 +71,6 @@ class _MarkerPopupState extends State<MarkerPopup> {
         accuracy: LocationAccuracy.high,
         distanceFilter: 100,
       );
-
     }
   }
   
@@ -80,7 +79,6 @@ class _MarkerPopupState extends State<MarkerPopup> {
     return StreamBuilder(
         stream: markerStream,
         builder: (BuildContext context, AsyncSnapshot<MarkerModel?> snapshot) {
-
           if (!snapshot.hasData || snapshot.hasError) {
             return Wrap(children: [
               Container(
@@ -200,9 +198,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
     if (data == null) return null;
 
     List<dynamic> coordinates = data['features'][0]['geometry']['coordinates'];
-
-    List<LatLng> points =
-        coordinates.map((point) => LatLng(point[1], point[0])).toList();
+    List<LatLng> points = coordinates.map((point) => LatLng(point[1], point[0])).toList();
 
     Polyline polyLine = Polyline(
       polylineId: const PolylineId("PolyLineId"),
