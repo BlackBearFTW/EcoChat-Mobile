@@ -19,7 +19,7 @@ void main() async {
   print("Setting up task....");
   Workmanager().registerPeriodicTask(
       "4bh3uerdfhjrn4rjeudhn4rejhujrn3aksjhfiewhfjiwjfeg",
-      "Test",
+      "Battery Warning Check",
       initialDelay: Duration(minutes: 15));
 
   runApp(const MyApp());
