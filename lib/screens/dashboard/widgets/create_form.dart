@@ -171,12 +171,13 @@ class _CreateFormViewState extends State<CreateFormView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
+        titleSpacing: 0,
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              margin: EdgeInsets.all(24),
+              margin: const EdgeInsets.all(24),
               child: Form(
                 key: _formKey,
                 child: Column(

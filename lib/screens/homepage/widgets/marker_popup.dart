@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:ecochat_app/global_widgets/marker_popup_row.dart';
 import 'package:ecochat_app/models/marker_model.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
 import 'package:ecochat_app/services/route_service_api.dart';
@@ -86,24 +87,9 @@ class _MarkerPopupState extends State<MarkerPopup> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text("Accu percentage"),
-                          Text("${marker.batteryLevel}%")
-                        ]),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text("Vrije USB"),
-                          Text("${marker.availableSlots}/${marker.totalSlots}"),
-                        ]),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text("Overdekt"),
-                          Text(marker.roofed ? "Ja" : "Nee"),
-                        ]),
+                    MarkerPopupRow("Accu percentage", "${marker.batteryLevel}%"),
+                    MarkerPopupRow("Vrije USB", "${marker.availableSlots}/${marker.totalSlots}"),
+                    MarkerPopupRow("Overdekt", marker.roofed ? "Ja" : "Nee"),
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

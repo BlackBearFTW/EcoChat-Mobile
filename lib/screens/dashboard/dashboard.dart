@@ -54,7 +54,8 @@ class _DashboardViewState extends State<DashboardView> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text("EcoChat",style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Admin Dashboard",style: TextStyle(fontWeight: FontWeight.bold)),
+          titleSpacing: 0,
         backgroundColor: const Color(0xff7672FF),
       ),
       body: activeSignalRConnection
@@ -88,14 +89,16 @@ class _DashboardViewState extends State<DashboardView> {
                 );
               })
           : const Center(child: Text("Loading Map...")),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add, color: Colors.black),
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const CreateFormView()),
-        ),
-      )
-    );
+        floatingActionButton: Padding(
+            padding: EdgeInsets.only(bottom: _fabBottomPadding),
+            child: FloatingActionButton(
+              child: const Icon(Icons.add, color: Colors.black),
+              backgroundColor: Colors.white,
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CreateFormView()),
+              ),
+            )));
   }
 
   void _loadCustomMarkerIcon() async {

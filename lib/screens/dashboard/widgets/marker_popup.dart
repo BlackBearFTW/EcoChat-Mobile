@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:ecochat_app/global_widgets/marker_popup_row.dart';
 import 'package:ecochat_app/models/marker_model.dart';
 import 'package:ecochat_app/services/authentication_api.dart';
 import 'package:ecochat_app/services/markers_api.dart';
@@ -30,7 +31,6 @@ class MarkerPopup extends StatefulWidget {
 }
 
 class _MarkerPopupState extends State<MarkerPopup> {
-  final String _apiKey = "5b3ce3597851110001cf6248b22ea2ab2dac408aab2870c02246d972";
   late final Stream<int?>? travelTimeStream;
   late LocationSettings locationSettings;
   bool locationAllowed = false;
@@ -38,6 +38,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
   final routeServiceApi = RouteServiceAPI();
   late AuthenticationApi authenticationApi;
   late MarkersApi markersApi;
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   void authenticate() async {
     authenticationApi = AuthenticationApi();
@@ -67,7 +68,105 @@ class _MarkerPopupState extends State<MarkerPopup> {
     locationSettings = getLocationSettings();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: markerStream,
+        builder: (BuildContext context, AsyncSnapshot<MarkerModel?> snapshot) {
+          if (!snapshot.hasData || snapshot.hasError) {
+            return Wrap(children: [
+              Container(
+                margin: const EdgeInsets.all(20.0),
+                alignment: Alignment.center,
+                child: _displayLoader(),
+              )
+            ]);
+          }
 
+          MarkerModel? marker = snapshot.data!;
+
+          return Wrap(
+            children: [
+              Container(
+                margin: const EdgeInsets.all(20.0),
+                alignment: Alignment.center,
+                child:
+                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  Text(
+                    marker.name,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 16),
+                  MarkerPopupRow("Accu percentage", "${marker.batteryLevel}%"),
+                  MarkerPopupRow("Vrije USB", "${marker.availableSlots}/${marker.totalSlots}"),
+                  MarkerPopupRow("Overdekt", marker.roofed ? "Ja" : "Nee"),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("Reistijd"),
+                        if (!locationAllowed)
+                          const Text("-")
+                        else
+                          StreamBuilder(
+                              stream: travelTimeStream,
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<int?> snapshot) {
+                                if (snapshot.hasError) print(snapshot.error);
+
+                                if (snapshot.hasError) return const Text("Error");
+                                if (!snapshot.hasData) return const Text("-");
+                                return Text("${snapshot.data} min");
+                              }),
+                      ]),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          width: double.infinity,
+                          child: RawMaterialButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            elevation: 0,
+                            child: const Text(
+                              "Bewerken",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            onPressed: () async {},
+                            fillColor: const Color(0xFF8CC63F),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          width: double.infinity,
+                          child: RawMaterialButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            elevation: 0,
+                            child: const Text(
+                              "Verwijderen",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            onPressed: () => _showDeleteAlertDialog(marker),
+                            fillColor: const Color(0xFFC63F3F),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                ]),
+              )
+            ],
+          );
+        });
+  }
+
+/*
   @override
   Widget build(BuildContext context) {
 
@@ -160,6 +259,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
           );
         });
   }
+*/
 
   LocationSettings getLocationSettings() {
 
@@ -179,10 +279,10 @@ class _MarkerPopupState extends State<MarkerPopup> {
       );
     }
 
-      return const LocationSettings(
+    return const LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 100,
-      );
+    );
   }
 
   Widget _displayLoader() {
@@ -207,28 +307,31 @@ class _MarkerPopupState extends State<MarkerPopup> {
     );
   }
 
-  void _showLocationAlertDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text("Locatie geweigerd"),
-        content: const Text("Sorry, deze functionaliteit is niet beschikbaar zonder je locatie aan te zetten 😓."),
-        actions: [
-          TextButton(
-            onPressed: () => Geolocator.openAppSettings(),
-            child: const Text("Instellingen",
-              style: TextStyle(color: Color(0xff7672FF)),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Oké",
-              style: TextStyle(color: Color(0xff7672FF)),
-            ),
-          )
-        ],
-      ),
-    );
+  void _showDeleteAlertDialog(MarkerModel marker) {
+    showDialog(context: context, builder: (BuildContext context) =>
+        AlertDialog(
+            title: const Text("Verwijder marker"),
+            content: const Text("Je staat op het punt om de geselecteerde marker te verwijderen, weet je het zeker?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  "Annuleer",
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  markersApi.deleteMarker(marker.id);
+                  widget.closeMarkerPopup();
+                },
+                child: const Text(
+                  "Verwijder",
+                  style: TextStyle(color: Color(0xFFC63F3F)),
+                ),
+              )
+            ]
+        ));
   }
 
 
@@ -250,24 +353,11 @@ class _MarkerPopupState extends State<MarkerPopup> {
     return Container();
   }
 
-
-  Widget _customRow(String textContent, String textData) {
-    if (editingMarker == false){
-      return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text(textContent), Text(textData)]);
-    }
-    return Container();
-  }
-
-
   late bool _roofed;
   late String _name = "";
   late double _latitude;
   late double _longitude;
   late int _totalSlots;
-
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   Widget _buildingRoofedField(Roofed) {
     String dropdownValue;
