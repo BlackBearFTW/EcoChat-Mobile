@@ -4,7 +4,7 @@ import 'package:ecochat_app/models/marker_model.dart';
 import 'package:ecochat_app/screens/homepage/widgets/mylocation_button.dart';
 import 'package:ecochat_app/screens/dashboard/widgets/marker_popup.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
-import 'package:ecochat_app/utils/image_utils.dart';
+import 'package:ecochat_app/utils/image_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -116,10 +116,8 @@ class _HomeViewState extends State<DashboardView> {
   }
 
   void _loadCustomMarkerIcon() async {
-    final Uint8List byteData =
-        await ImageUtils.getBytesFromAsset("assets/marker-icon.png", 150);
-    final Uint8List byteDataGray =
-        await ImageUtils.getBytesFromAsset("assets/marker-icon-gray.png", 150);
+    final Uint8List byteData = await ImageUtil.getBytesFromAsset("assets/marker-icon.png", 150);
+    final Uint8List byteDataGray = await ImageUtil.getBytesFromAsset("assets/marker-icon-gray.png", 150);
     setState(() {
       markerIcon = BitmapDescriptor.fromBytes(byteData);
       grayMarkerIcon = BitmapDescriptor.fromBytes(byteDataGray);
@@ -165,12 +163,14 @@ class _HomeViewState extends State<DashboardView> {
   }
 
   void _showMarkerBottomSheet(String _markerId) async {
-    bottomSheetController = _scaffoldKey.currentState?.showBottomSheet((BuildContext context) {
+    bottomSheetController =
+        _scaffoldKey.currentState?.showBottomSheet((BuildContext context) {
       return MarkerPopup(
         signalRMarkersInstance: signalRMarkers,
         markerId: _markerId,
         closeMarkerPopup: _onMapPress,
-        polyLineSetter: (Set<Polyline> polyLines) => setState(() => _polyLines = polyLines),
+        polyLineSetter: (Set<Polyline> polyLines) =>
+            setState(() => _polyLines = polyLines),
         polyLines: _polyLines,
       );
     },
