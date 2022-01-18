@@ -1,3 +1,4 @@
+import 'package:ecochat_app/screens/authentication/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -26,7 +27,7 @@ class _MyAppState extends State<MyApp> {
  @override
  Widget build(BuildContext context) {
    return const MaterialApp(
-     home: HomeView(),
+     home: AuthenticationView(),
      debugShowCheckedModeBanner: false,
    );
  }
