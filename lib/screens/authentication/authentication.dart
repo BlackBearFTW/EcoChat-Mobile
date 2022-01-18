@@ -12,28 +12,61 @@ class AuthenticationView extends StatefulWidget {
 
 class _AuthenticationViewState extends State<AuthenticationView> {
 
+  late AuthenticationApi authenticationApi;
+  late bool bToken = false;
+  late bool clicked = false;
 
+  authenticate(_name, _password) async {
+    authenticationApi = AuthenticationApi();
+    // String token = await authenticationApi.login("Vincent", "Vincent");
+    String token = await authenticationApi.login(_name.text, _password.text);
+    if (token != "") {
+      bToken = true;
+    }
 
-  TextEditingController _emailField = TextEditingController();
+    return token;
+  }
+
+  TextEditingController _nameField = TextEditingController();
   TextEditingController _passwordField = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("EcoChat", style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xff7672FF),
+      ),
       body: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Color(0xff7672FF),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              bToken
+                  ? Container()
+                  : clicked
+                      ? const Text(
+                          "Uw gebruikers naam of wachtwoord is incorrect.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                          // overflow: TextOverflow.ellipsis,
+                        )
+                      : Container(),
+              const SizedBox(
+                height: 15,
+              ),
               Container(
                 width: MediaQuery.of(context).size.width / 1.3,
                 child: TextFormField(
                   style: TextStyle(color: Colors.white),
-                  controller: _emailField,
+                  controller: _nameField,
                   decoration: const InputDecoration(
                     hintText: "Naam",
                     hintStyle: TextStyle(
@@ -75,8 +108,10 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                 ),
                 child: MaterialButton(
                   onPressed: () async {
-                    bool shouldNavigate = await login(_emailField.text, _passwordField.text);
-                    if (shouldNavigate) {
+                    authenticate(_nameField, _passwordField);
+                    clicked = true;
+                    setState(() {});
+                    if (bToken) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -85,7 +120,7 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                       );
                     }
                   },
-                  child: Text("Login"),
+                  child: const Text("Login"),
                 ),
               ),
             ],

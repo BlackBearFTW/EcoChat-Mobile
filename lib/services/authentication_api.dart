@@ -10,6 +10,10 @@ class AuthenticationApi {
       Uri.parse(serverUrlAuth + "/login"),
       headers: {'authorization': basicAuth},
     );
+
+    if (response.statusCode == 401) {
+      return "";
+    }
     return response.body.toString();
   }
 }
