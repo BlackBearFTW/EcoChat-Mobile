@@ -37,7 +37,7 @@ class MarkersApi {
   }
 
   void createMarker(MarkerModel data) async {
-    http.Response response = await http.post(
+    await http.post(
       Uri.parse(serverUrl),
       headers: headers,
       body: json.encode(data.toJson()),
@@ -53,9 +53,10 @@ class MarkersApi {
   }
 
   void deleteMarker(String guid) async {
-    await http.delete(
+    http.Response response = await http.delete(
       Uri.parse(serverUrl + guid),
       headers: headers,
     );
+    print(response);
   }
 }
