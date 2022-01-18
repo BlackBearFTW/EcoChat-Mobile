@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
    <application
         android:label="EcoChat"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ecochat_app_icon">
 
        <meta-data android:name="com.google.android.geo.API_KEY"
            android:value="AIzaSyCLZlV1XCb63Ek6bH7izdvdig-lxCKCA04"/>
