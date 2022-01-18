@@ -192,3 +192,4 @@ class _HomeViewState extends State<DashboardView> {
     setState(() => _fabBottomPadding = 0.0);
   }
 }
+

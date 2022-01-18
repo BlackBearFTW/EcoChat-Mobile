@@ -7,6 +7,7 @@ import 'package:ecochat_app/services/markers_signalr.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -39,6 +40,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
   late final Stream<int?>? travelTimeStream;
   late LocationSettings locationSettings;
   bool locationAllowed = false;
+  bool editingMarker = false;
   late Set<Polyline> _polyLines = widget.polyLines;
   late AuthenticationApi authenticationApi;
   late MarkersApi markersAPI;
@@ -133,7 +135,13 @@ class _MarkerPopupState extends State<MarkerPopup> {
                       ),
                       child: Text("Update"),
                       onPressed: () {
-                        Text("${marker.id}%");
+                        if (editingMarker == false) {
+                          editingMarker = true;
+                        } else if (editingMarker == true) {
+                          editingMarker = false;
+                        }
+                        print(editingMarker);
+                        setState(() {});
                       },
                     ),
                     const SizedBox(width: 10,),
@@ -151,47 +159,29 @@ class _MarkerPopupState extends State<MarkerPopup> {
                       },
                     ),
                   ]),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("Accu percentage"),
-                        Text("${marker.batteryLevel}%")
-                      ]),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("Vrije USB"),
-                        Text("${marker.availableSlots}/${marker.totalSlots}"),
-                      ]),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("Overdekt"),
-                        Text(marker.roofed ? "Ja" : "Nee"),
-                      ]),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("Reistijd"),
-                        if (!locationAllowed)
-                          const Text("-")
-                        else
-                          StreamBuilder(
-                              stream: travelTimeStream,
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<int?> snapshot) {
-                                if (snapshot.hasError) print(snapshot.error);
-
-                                if (snapshot.hasError)
-                                  return const Text("Error");
-                                if (!snapshot.hasData) return const Text("-");
-                                return Text("${snapshot.data} min");
-                              }),
-                      ]),
+                  _customRow("Accu percentage", "${marker.batteryLevel}%"),
+                  _customRow("Vrije USB", marker.availableSlots.toString()),
+                  _customRow("Overdekt", marker.roofed ? "Ja" : "Nee"),
+                  Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        _updateForm(
+                            marker.id,
+                            marker.roofed,
+                            marker.name,
+                            marker.latitude.toString(),
+                            marker.longitude.toString(),
+                            marker.batteryLevel.toString(),
+                            marker.availableSlots.toString(),
+                            marker.totalSlots.toString()),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 16),
-
                 ]),
-              )
+              ),
             ],
           );
         });
@@ -273,4 +263,175 @@ class _MarkerPopupState extends State<MarkerPopup> {
       ),
     );
   }
+
+
+//form widgets
+  Widget _updateForm(id, roofed, name, latitude, longitude, batteryLevel, availableSlots, totalSlots) {
+    if (editingMarker == true) {
+      return Column(
+        children: [
+          _buildingRoofedField(roofed),
+          _buildingNameField(name),
+          _buildingLatitudeField(latitude),
+          _buildingLongitudeField(longitude),
+          _buildingTotalSlotsField(totalSlots),
+          SizedBox(height: 100),
+          _buildingFormElevatedButton("Toevoegen", id),
+        ],
+      );
+    }
+    return Container();
+  }
+
+
+  Widget _customRow(String textContent, String textData) {
+    if (editingMarker == false){
+      return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [Text(textContent), Text(textData)]);
+    }
+    return Container();
+  }
+
+
+  late bool _roofed;
+  late String _name = "";
+  late double _latitude;
+  late double _longitude;
+  late int _totalSlots;
+
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+  Widget _buildingRoofedField(Roofed) {
+    String dropdownValue;
+    Roofed ? dropdownValue = 'Niet Bedekt' : dropdownValue = 'Bedekt';
+
+    //TODO fix unselected tap validation
+    return DropdownButton<String>(
+      value: dropdownValue,
+      isExpanded: true,
+      icon: const Icon(Icons.arrow_downward),
+      elevation: 16,
+      underline: Container(
+        height: 1,
+        color: Colors.black38,
+      ),
+      onChanged: (String? newValue) {
+        setState(() {
+          dropdownValue = newValue!;
+          //convert to true or false
+          if (dropdownValue == "Bedekt") {
+            _roofed = true;
+          } else {
+            _roofed = false;
+          }
+        },
+        );
+      },
+      items: <String>['Bedekt', 'Niet Bedekt'].map<DropdownMenuItem<String>>(
+            (String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        },
+      ).toList(),
+    );
+  }
+
+  Widget _buildingNameField(String Name) {
+    return TextFormField(
+      decoration: InputDecoration(labelText: "naam"),
+      initialValue: Name,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return "Voer een naam in.";
+        }
+      },
+      onSaved: (value) {
+        _name = value!;
+      },
+    );
+  }
+
+  Widget _buildingLatitudeField(String Latitude) {
+    return TextFormField(
+      decoration: InputDecoration(labelText: "Latitude"),
+      keyboardType: TextInputType.number,
+      initialValue: Latitude,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return "Voer een Latitude in.";
+        }
+      },
+      onSaved: (value) {
+        _latitude = double.parse(value!);
+        // _latitude = value! as double;
+      },
+    );
+  }
+
+
+
+  Widget _buildingLongitudeField(String Longitude) {
+    return TextFormField(
+      decoration: InputDecoration(labelText: "Longitude"),
+      keyboardType: TextInputType.number,
+      initialValue: Longitude,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return "Voer een Longitude in.";
+        }
+      },
+      onSaved: (value) {
+        _longitude = double.parse(value!);
+      },
+    );
+  }
+
+  Widget _buildingTotalSlotsField(String TotalSlots) {
+    return TextFormField(
+      decoration: InputDecoration(labelText: "Poorten"),
+      keyboardType: TextInputType.number,
+      initialValue: TotalSlots,
+      inputFormatters: <TextInputFormatter>[
+        FilteringTextInputFormatter.digitsOnly,
+      ],
+      validator: (value) {
+        if (value!.isEmpty) {
+          return "Voer de aantal oplaat poorten in";
+        }
+      },
+      onSaved: (value) {
+        _totalSlots = int.parse(value!);
+        // _totalSlots = value! as int;
+      },
+    );
+  }
+
+  Widget _buildingFormElevatedButton(String text, id) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: Color(0xff7672FF),
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+        textStyle: const TextStyle(fontSize: 16),
+      ),
+      child: Text(text),
+      onPressed: () {
+        if (!formKey.currentState!.validate()) {
+          return;
+        }
+        formKey.currentState!.save();
+        //dummy data
+        int _batteryLevel = 89;
+        int _availableSlots = _totalSlots;
+
+        print(MarkerModel(id, _name, _roofed, _latitude, _longitude, _batteryLevel, _availableSlots, _totalSlots));
+        markersAPI.updateMarker(id,
+          MarkerModel(id, _name, _roofed, _latitude, _longitude, _batteryLevel, _availableSlots, _totalSlots),
+        );
+      },
+    );
+  }
 }
+
