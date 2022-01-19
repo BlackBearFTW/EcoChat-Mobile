@@ -33,7 +33,7 @@ class MarkerPopup extends StatefulWidget {
 }
 
 class _MarkerPopupState extends State<MarkerPopup> {
-  late final Stream<int?>? travelTimeStream;
+  Stream<int?>? travelTimeStream;
   late LocationSettings locationSettings;
   bool locationAllowed = false;
   bool editingMarker = false;
@@ -49,7 +49,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
   }
 
   late final Stream<MarkerModel?> markerStream = widget.signalRMarkersInstance.getOneMarkerStream(widget.markerId).map((markerData) {
-    if (markerData != null && locationAllowed) {
+    if (travelTimeStream == null && markerData != null && locationAllowed) {
       travelTimeStream = Geolocator
           .getPositionStream(locationSettings: locationSettings)
           .asyncMap((event) async => await routeServiceApi.getTravelTime(LatLng(markerData.latitude, markerData.longitude)));
