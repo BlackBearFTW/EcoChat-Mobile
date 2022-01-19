@@ -41,10 +41,13 @@ class _MarkerEditorState extends State<MarkerEditor> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text("Overdekt"),
-                  Switch(value: widget.marker.roofed, onChanged: (x) {
-                    widget.marker.roofed = x;
-                   setState(() => isToggled = x);
-                  }),
+                  Switch(
+                      value: widget.marker.roofed,
+                      activeColor: const Color(0xff7672FF),
+                      onChanged: (x) {
+                        widget.marker.roofed = x;
+                        setState(() => isToggled = x);
+                      }),
                 ]
             ),
           ),
