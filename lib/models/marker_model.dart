@@ -13,6 +13,17 @@ class MarkerModel {
 
   MarkerModel(this.id, this.name, this.roofed, this.latitude, this.longitude, this.batteryLevel, this.availableSlots, this.totalSlots);
 
+  MarkerModel.empty() {
+    id = "00000000-0000-0000-0000-000000000000";
+    name = "";
+    roofed = false;
+    latitude = 0.0;
+    longitude = 0.0;
+    batteryLevel = 100;
+    availableSlots = 0;
+    totalSlots = 0;
+  }
+
   MarkerModel.fromJson(Map<String, dynamic> json) {
     try {
       id = json['id'];
