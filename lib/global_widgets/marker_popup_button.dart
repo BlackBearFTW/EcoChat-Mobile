@@ -27,7 +27,7 @@ class MarkerPopupButton extends StatelessWidget {
           elevation: 0,
           child: Text(label, style: TextStyle(color: labelColor)),
           onPressed: onPress,
-          fillColor: const Color(0xFFA6A6A6),
+          fillColor: backgroundColor,
         ),
       ),
     );

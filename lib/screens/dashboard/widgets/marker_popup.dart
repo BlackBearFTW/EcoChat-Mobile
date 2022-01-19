@@ -287,6 +287,10 @@ class _MarkerPopupState extends State<MarkerPopup> {
                         _totalSlots
                     ),
                   );
+
+                  setState(() {
+                    editingMarker = !editingMarker;
+                  });
                 }
             ),
           ],
