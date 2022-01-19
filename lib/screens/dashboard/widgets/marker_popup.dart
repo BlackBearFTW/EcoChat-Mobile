@@ -6,6 +6,7 @@ import 'package:ecochat_app/services/authentication_api.dart';
 import 'package:ecochat_app/services/markers_api.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
 import 'package:ecochat_app/services/route_service_api.dart';
+import 'package:ecochat_app/utils/location_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +68,7 @@ class _MarkerPopupState extends State<MarkerPopup> {
       setState(() => locationAllowed = [LocationPermission.always, LocationPermission.whileInUse].contains(value));
     });
 
-    locationSettings = getLocationSettings();
+    locationSettings = LocationUtil.getSettings();
   }
 
   @override
@@ -164,30 +165,6 @@ class _MarkerPopupState extends State<MarkerPopup> {
               marker.totalSlots.toString()),
         ],
       ),
-    );
-  }
-
-  LocationSettings getLocationSettings() {
-
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return AndroidSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 25,
-        intervalDuration: const Duration(seconds: 30),
-      );
-    }
-
-    if ([TargetPlatform.iOS,  TargetPlatform.macOS].contains(defaultTargetPlatform)) {
-      return AppleSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 25,
-        pauseLocationUpdatesAutomatically: true,
-      );
-    }
-
-    return const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 100,
     );
   }
 
