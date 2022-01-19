@@ -24,10 +24,11 @@ class _DashboardViewState extends State<DashboardView> {
   bool locationAllowed = false;
   bool activeSignalRConnection = false;
 
+  // TODO: FETCH FROM LOGIN SCREEN
+  final String TEST_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IlZpbmNlbnQiLCJyb2xlIjoiNGRNMW5mcjBtM2MwQ2g0VCIsIm5iZiI6MTY0MjYyNDc1NywiZXhwIjoxNjQyNjI4MzU3LCJpYXQiOjE2NDI2MjQ3NTd9.0HjNy86NRgfibvpvvEXMWnDvgkbN7N6h28X3lbbgwnU";
   final Completer<GoogleMapController> _mapController = Completer();
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
-  BitmapDescriptor grayMarkerIcon =
-      BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
+  BitmapDescriptor grayMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
   SignalRMarkers signalRMarkers = SignalRMarkers();
   late final stream = signalRMarkers.getAllMarkersStream();
   PersistentBottomSheetController? bottomSheetController;
@@ -44,8 +45,7 @@ class _DashboardViewState extends State<DashboardView> {
     });
 
     signalRMarkers.initializeConnection().then((value) {
-      setState(() => activeSignalRConnection =
-          signalRMarkers.getStatus() == HubConnectionState.Connected);
+      setState(() => activeSignalRConnection = signalRMarkers.getStatus() == HubConnectionState.Connected);
     });
   }
 
@@ -63,8 +63,7 @@ class _DashboardViewState extends State<DashboardView> {
               stream: stream,
               builder: (BuildContext context,
                   AsyncSnapshot<List<MarkerModel>?> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting ||
-                    !snapshot.hasData) {
+                if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
                   return const Center(child: Text("Loading Map...."));
                 }
 
@@ -96,7 +95,7 @@ class _DashboardViewState extends State<DashboardView> {
               backgroundColor: Colors.white,
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CreateFormView()),
+                MaterialPageRoute(builder: (context) => CreateFormView(TEST_TOKEN)),
               ),
             )));
   }
@@ -141,6 +140,7 @@ class _DashboardViewState extends State<DashboardView> {
       return MarkerPopup(
         signalRMarkersInstance: signalRMarkers,
         markerId: _markerId,
+        jsonWebToken: TEST_TOKEN,
         closeMarkerPopup: _closeBottomSheet,
       );
     },

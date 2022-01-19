@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:ecochat_app/global_widgets/marker_popup_button.dart';
 import 'package:ecochat_app/global_widgets/marker_popup_row.dart';
 import 'package:ecochat_app/models/marker_model.dart';
-import 'package:ecochat_app/services/authentication_api.dart';
 import 'package:ecochat_app/services/markers_api.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
 import 'package:ecochat_app/services/route_service_api.dart';
@@ -19,15 +18,15 @@ import 'package:skeleton_loader/skeleton_loader.dart';
 class MarkerPopup extends StatefulWidget {
   final SignalRMarkers signalRMarkersInstance;
   final String markerId;
+  final String jsonWebToken;
   final void Function() closeMarkerPopup;
 
-  const MarkerPopup(
-      {Key? key,
+  const MarkerPopup({Key? key,
       required this.signalRMarkersInstance,
       required this.markerId,
+      required this.jsonWebToken,
       required this.closeMarkerPopup,
-      })
-      : super(key: key);
+      }) : super(key: key);
 
   @override
   _MarkerPopupState createState() => _MarkerPopupState();
@@ -39,15 +38,8 @@ class _MarkerPopupState extends State<MarkerPopup> {
   bool locationAllowed = false;
   bool editingMarker = false;
   final routeServiceApi = RouteServiceAPI();
-  late AuthenticationApi authenticationApi;
   late MarkersApi markersApi;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  void authenticate() async {
-    authenticationApi = AuthenticationApi();
-    String token = await authenticationApi.login("Vincent", "Vincent");
-    markersApi = MarkersApi(token);
-  }
 
   late final Stream<MarkerModel?> markerStream = widget.signalRMarkersInstance.getOneMarkerStream(widget.markerId).map((markerData) {
     if (travelTimeStream == null && markerData != null && locationAllowed) {
@@ -62,12 +54,12 @@ class _MarkerPopupState extends State<MarkerPopup> {
   @override
   void initState() {
     super.initState();
-    authenticate();
 
     Geolocator.checkPermission().then((value) {
       setState(() => locationAllowed = [LocationPermission.always, LocationPermission.whileInUse].contains(value));
     });
 
+    markersApi = MarkersApi(widget.jsonWebToken);
     locationSettings = LocationUtil.getSettings();
   }
 
@@ -153,16 +145,50 @@ class _MarkerPopupState extends State<MarkerPopup> {
   Widget displayUpdateForm(MarkerModel marker) {
     return Form(
       key: formKey,
-      child: Column(
+      child:  Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          _updateForm(
-              marker.id,
-              marker.roofed,
-              marker.name,
-              marker.latitude.toString(),
-              marker.longitude.toString(),
-              marker.totalSlots.toString()),
+        children: [
+          buildField("Naam", TextInputType.name, marker.name, (value) => marker.name = value!),
+          buildField("Latitude", TextInputType.number, "${marker.latitude}", (value) => marker.latitude = double.parse(value!)),
+          buildField("Longitude", TextInputType.number, "${marker.longitude}", (value) => marker.longitude = double.parse(value!)),
+          buildField("Aantal poorten", TextInputType.number, "${marker.totalSlots}", (value) => marker.totalSlots = int.parse(value!)),
+          Padding(
+            padding: const EdgeInsets.only(top: 16, bottom: 0),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Overdekt"),
+                  Switch(value: marker.roofed, onChanged: (x) => marker.roofed = x)
+                ]
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              MarkerPopupButton(
+                  label: "Annuleer",
+                  backgroundColor: const Color(0xFFA6A6A6),
+                  labelColor: Colors.white,
+                  onPress: () => setState(() => editingMarker = !editingMarker)
+              ),
+              const SizedBox(width: 8),
+              MarkerPopupButton(
+                  label: "Opslaan",
+                  backgroundColor: const Color(0xFF8CC63F),
+                  labelColor: Colors.white,
+                  onPress: () {
+                    if (!formKey.currentState!.validate()) return;
+                    formKey.currentState!.save();
+
+                    marker.availableSlots = marker.totalSlots;
+
+                    markersApi.updateMarker(marker.id, marker);
+
+                    setState(() => editingMarker = !editingMarker);
+                  }
+              ),
+            ],
+          )
         ],
       ),
     );
@@ -210,77 +236,6 @@ class _MarkerPopupState extends State<MarkerPopup> {
             ]
         ));
   }
-
-//form widgets
-  Widget _updateForm(id, roofed, name, latitude, longitude, totalSlots) {
-    bool overdekt = roofed;
-
-    return Column(
-      children: [
-        buildField("Naam", TextInputType.name, name, (value) => _name = value!),
-        buildField("Latitude", TextInputType.number, latitude, (value) => _latitude = double.parse(value!)),
-        buildField("Longitude", TextInputType.number, longitude, (value) => _longitude = double.parse(value!)),
-        buildField("Aantal poorten", TextInputType.number, totalSlots, (value) => _totalSlots = int.parse(value!)),
-        Padding(
-          padding: const EdgeInsets.only(top: 16, bottom: 0),
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Overdekt"),
-                Switch(value: overdekt, onChanged: (x) => print(x))
-              ]
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            MarkerPopupButton(
-                label: "Annuleer",
-                backgroundColor: const Color(0xFFA6A6A6),
-                labelColor: Colors.white,
-                onPress: () => setState(() => editingMarker = !editingMarker)
-            ),
-            const SizedBox(width: 8),
-            MarkerPopupButton(
-                label: "Opslaan",
-                backgroundColor: const Color(0xFF8CC63F),
-                labelColor: Colors.white,
-                onPress: () {
-                  if (!formKey.currentState!.validate()) return;
-                  formKey.currentState!.save();
-
-                  int _batteryLevel = 100;
-                  int _availableSlots = _totalSlots;
-
-                  markersApi.updateMarker(id,
-                    MarkerModel(
-                        id,
-                        _name,
-                        _roofed,
-                        _latitude,
-                        _longitude,
-                        _batteryLevel,
-                        _availableSlots,
-                        _totalSlots
-                    ),
-                  );
-
-                  setState(() {
-                    editingMarker = !editingMarker;
-                  });
-                }
-            ),
-          ],
-        )
-      ],
-    );
-  }
-
-  late bool _roofed = true;
-  late String _name = "";
-  late double _latitude;
-  late double _longitude;
-  late int _totalSlots;
 
   Widget buildField(String label, TextInputType keyboardType, String initialValue, void Function(String? value) onSaved) {
     return TextFormField(
