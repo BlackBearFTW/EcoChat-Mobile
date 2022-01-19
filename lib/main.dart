@@ -14,7 +14,7 @@ import 'models/marker_model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   NotificationService().init();
-  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+  Workmanager().initialize(callbackDispatcher);
   
   Workmanager().registerPeriodicTask(
       "4bh3uerdfhjrn4rjeudhn4rejhujrn3aksjhfiewhfjiwjfeg",
