@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:ecochat_app/global_widgets/marker_popup_button.dart';
 import 'package:ecochat_app/global_widgets/marker_popup_row.dart';
 import 'package:ecochat_app/models/marker_model.dart';
 import 'package:ecochat_app/services/authentication_api.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:skeleton_loader/skeleton_loader.dart';
@@ -16,7 +18,7 @@ import 'package:skeleton_loader/skeleton_loader.dart';
 class MarkerPopup extends StatefulWidget {
   final SignalRMarkers signalRMarkersInstance;
   final String markerId;
-  final Function() closeMarkerPopup;
+  final void Function() closeMarkerPopup;
 
   const MarkerPopup(
       {Key? key,
@@ -90,176 +92,80 @@ class _MarkerPopupState extends State<MarkerPopup> {
               Container(
                 margin: const EdgeInsets.all(20.0),
                 alignment: Alignment.center,
-                child:
-                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  Text(
-                    marker.name,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 16),
-                  MarkerPopupRow("Accu percentage", "${marker.batteryLevel}%"),
-                  MarkerPopupRow("Vrije USB", "${marker.availableSlots}/${marker.totalSlots}"),
-                  MarkerPopupRow("Overdekt", marker.roofed ? "Ja" : "Nee"),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("Reistijd"),
-                        if (!locationAllowed)
-                          const Text("-")
-                        else
-                          StreamBuilder(
-                              stream: travelTimeStream,
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<int?> snapshot) {
-                                if (snapshot.hasError) print(snapshot.error);
-
-                                if (snapshot.hasError) return const Text("Error");
-                                if (!snapshot.hasData) return const Text("-");
-                                return Text("${snapshot.data} min");
-                              }),
-                      ]),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 48,
-                          width: double.infinity,
-                          child: RawMaterialButton(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                            elevation: 0,
-                            child: const Text(
-                              "Bewerken",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            onPressed: () async {},
-                            fillColor: const Color(0xFF8CC63F),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: SizedBox(
-                          height: 48,
-                          width: double.infinity,
-                          child: RawMaterialButton(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                            elevation: 0,
-                            child: const Text(
-                              "Verwijderen",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            onPressed: () => _showDeleteAlertDialog(marker),
-                            fillColor: const Color(0xFFC63F3F),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                ]),
-              )
-            ],
-          );
-        });
-  }
-
-/*
-  @override
-  Widget build(BuildContext context) {
-
-    return StreamBuilder(
-        stream: markerStream,
-        builder: (BuildContext context, AsyncSnapshot<MarkerModel?> snapshot) {
-          if (!snapshot.hasData || snapshot.hasError) {
-            return Wrap(children: [
-              Container(
-                margin: const EdgeInsets.all(20.0),
-                alignment: Alignment.center,
-                child: _displayLoader(),
-              )
-            ]);
-          }
-
-          MarkerModel? marker = snapshot.data!;
-
-          return Wrap(
-            children: [
-              Container(
-                margin: const EdgeInsets.all(20.0),
-                alignment: Alignment.center,
-                child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  Text(
-                    marker.name,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: const Color(0xff7672FF),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 30, vertical: 15),
-                        textStyle: const TextStyle(fontSize: 16),
-                      ),
-                      child: Text("Update"),
-                      onPressed: () {
-                        if (editingMarker == false) {
-                          editingMarker = true;
-                        } else if (editingMarker == true) {
-                          editingMarker = false;
-                        }
-                        print(editingMarker);
-                        setState(() {});
-                      },
-                    ),
-                    const SizedBox(width: 10,),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: const Color(0xff7672FF),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 30, vertical: 15),
-                        textStyle: const TextStyle(fontSize: 16),
-                      ),
-                      child: Text("Delete"),
-                      onPressed: () {
-                        markersApi.deleteMarker(marker.id);
-                        widget.closeMarkerPopup();
-                      },
-                    ),
-                  ]),
-                  const SizedBox(height: 16),
-                  _customRow("Accu percentage", "${marker.batteryLevel}%"),
-                  _customRow("Vrije USB", marker.availableSlots.toString()),
-                  _customRow("Overdekt", marker.roofed ? "Ja" : "Nee"),
-                  Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        _updateForm(
-                            marker.id,
-                            marker.roofed,
-                            marker.name,
-                            marker.latitude.toString(),
-                            marker.longitude.toString(),
-                            marker.batteryLevel.toString(),
-                            marker.availableSlots.toString(),
-                            marker.totalSlots.toString()),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ]),
+                child: editingMarker ? displayUpdateForm(marker) : displayInformationPopup(marker),
               ),
             ],
           );
         });
   }
-*/
+
+  Widget displayInformationPopup(MarkerModel marker) {
+    return Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+      Text(
+        marker.name,
+        style: const TextStyle(
+            fontWeight: FontWeight.bold, fontSize: 16),
+      ),
+      const SizedBox(height: 16),
+      MarkerPopupRow("Accu percentage", "${marker.batteryLevel}%"),
+      MarkerPopupRow("Vrije USB", "${marker.availableSlots}/${marker.totalSlots}"),
+      MarkerPopupRow("Overdekt", marker.roofed ? "Ja" : "Nee"),
+      Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text("Reistijd"),
+            if (!locationAllowed)
+              const Text("-")
+            else
+              StreamBuilder(
+                  stream: travelTimeStream,
+                  builder: (BuildContext context,
+                      AsyncSnapshot<int?> snapshot) {
+                    if (snapshot.hasError) print(snapshot.error);
+
+                    if (snapshot.hasError) return const Text("Error");
+                    if (!snapshot.hasData) return const Text("-");
+                    return Text("${snapshot.data} min");
+                  }),
+          ]),
+      const SizedBox(height: 16),
+      Row(
+        children: [
+          MarkerPopupButton(
+              label: "Bewerken",
+              backgroundColor: const Color(0xFF8CC63F),
+              labelColor: Colors.white,
+              onPress: () => setState(() => editingMarker = !editingMarker)
+          ),
+          const SizedBox(width: 8),
+          MarkerPopupButton(
+              label: "Verwijderen",
+              backgroundColor: const Color(0xFFC63F3F),
+              labelColor: Colors.white,
+              onPress: () => _showDeleteAlertDialog(marker)
+          ),
+        ],
+      )
+    ]);
+  }
+
+  Widget displayUpdateForm(MarkerModel marker) {
+    return Form(
+      key: formKey,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          _updateForm(
+              marker.id,
+              marker.roofed,
+              marker.name,
+              marker.latitude.toString(),
+              marker.longitude.toString(),
+              marker.totalSlots.toString()),
+        ],
+      ),
+    );
+  }
 
   LocationSettings getLocationSettings() {
 
@@ -315,177 +221,96 @@ class _MarkerPopupState extends State<MarkerPopup> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  "Annuleer",
-                  style: TextStyle(color: Colors.black),
-                ),
+                child: const Text("Annuleer", style: TextStyle(color: Colors.black)),
               ),
               TextButton(
                 onPressed: () {
                   markersApi.deleteMarker(marker.id);
                   widget.closeMarkerPopup();
                 },
-                child: const Text(
-                  "Verwijder",
-                  style: TextStyle(color: Color(0xFFC63F3F)),
-                ),
+                child: const Text("Verwijder", style: TextStyle(color: Color(0xFFC63F3F))),
               )
             ]
         ));
   }
 
-
 //form widgets
-  Widget _updateForm(id, roofed, name, latitude, longitude, batteryLevel, availableSlots, totalSlots) {
-    if (editingMarker == true) {
-      return Column(
-        children: [
-          _buildingRoofedField(roofed),
-          _buildingNameField(name),
-          _buildingLatitudeField(latitude),
-          _buildingLongitudeField(longitude),
-          _buildingTotalSlotsField(totalSlots),
-          SizedBox(height: 30),
-          _buildingFormElevatedButton("Toevoegen", id),
-        ],
-      );
-    }
-    return Container();
+  Widget _updateForm(id, roofed, name, latitude, longitude, totalSlots) {
+    bool overdekt = roofed;
+
+    return Column(
+      children: [
+        buildField("Naam", TextInputType.name, name, (value) => _name = value!),
+        buildField("Latitude", TextInputType.number, latitude, (value) => _latitude = double.parse(value!)),
+        buildField("Longitude", TextInputType.number, longitude, (value) => _longitude = double.parse(value!)),
+        buildField("Aantal poorten", TextInputType.number, totalSlots, (value) => _totalSlots = int.parse(value!)),
+        Padding(
+          padding: const EdgeInsets.only(top: 16, bottom: 0),
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Overdekt"),
+                Switch(value: overdekt, onChanged: (x) => print(x))
+              ]
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            MarkerPopupButton(
+                label: "Annuleer",
+                backgroundColor: const Color(0xFFA6A6A6),
+                labelColor: Colors.white,
+                onPress: () => setState(() => editingMarker = !editingMarker)
+            ),
+            const SizedBox(width: 8),
+            MarkerPopupButton(
+                label: "Opslaan",
+                backgroundColor: const Color(0xFF8CC63F),
+                labelColor: Colors.white,
+                onPress: () {
+                  if (!formKey.currentState!.validate()) return;
+                  formKey.currentState!.save();
+
+                  int _batteryLevel = 100;
+                  int _availableSlots = _totalSlots;
+
+                  markersApi.updateMarker(id,
+                    MarkerModel(
+                        id,
+                        _name,
+                        _roofed,
+                        _latitude,
+                        _longitude,
+                        _batteryLevel,
+                        _availableSlots,
+                        _totalSlots
+                    ),
+                  );
+                }
+            ),
+          ],
+        )
+      ],
+    );
   }
 
-  late bool _roofed;
+  late bool _roofed = true;
   late String _name = "";
   late double _latitude;
   late double _longitude;
   late int _totalSlots;
 
-  Widget _buildingRoofedField(Roofed) {
-    String dropdownValue;
-    Roofed ? dropdownValue = 'Niet Bedekt' : dropdownValue = 'Bedekt';
-
-    //TODO fix unselected tap validation
-    return DropdownButton<String>(
-      value: dropdownValue,
-      isExpanded: true,
-      icon: const Icon(Icons.arrow_downward),
-      elevation: 16,
-      underline: Container(
-        height: 1,
-        color: Colors.black38,
-      ),
-      onChanged: (String? newValue) {
-        setState(() {
-          dropdownValue = newValue!;
-          //convert to true or false
-          if (dropdownValue == "Bedekt") {
-            _roofed = true;
-          } else {
-            _roofed = false;
-          }
-        },
-        );
-      },
-      items: <String>['Bedekt', 'Niet Bedekt'].map<DropdownMenuItem<String>>(
-            (String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        },
-      ).toList(),
-    );
-  }
-
-  Widget _buildingNameField(String Name) {
+  Widget buildField(String label, TextInputType keyboardType, String initialValue, void Function(String? value) onSaved) {
     return TextFormField(
-      decoration: InputDecoration(labelText: "naam"),
-      initialValue: Name,
+      decoration: InputDecoration(labelText: label),
+      keyboardType: keyboardType,
+      initialValue: initialValue,
       validator: (value) {
-        if (value!.isEmpty) {
-          return "Voer een naam in.";
-        }
+        if (value!.isNotEmpty) return null;
+        return "Voer een ${label.toLowerCase()} in.";
       },
-      onSaved: (value) {
-        _name = value!;
-      },
-    );
-  }
-
-  Widget _buildingLatitudeField(String Latitude) {
-    return TextFormField(
-      decoration: InputDecoration(labelText: "Latitude"),
-      keyboardType: TextInputType.number,
-      initialValue: Latitude,
-      validator: (value) {
-        if (value!.isEmpty) {
-          return "Voer een Latitude in.";
-        }
-      },
-      onSaved: (value) {
-        _latitude = double.parse(value!);
-        // _latitude = value! as double;
-      },
-    );
-  }
-
-  Widget _buildingLongitudeField(String Longitude) {
-    return TextFormField(
-      decoration: InputDecoration(labelText: "Longitude"),
-      keyboardType: TextInputType.number,
-      initialValue: Longitude,
-      validator: (value) {
-        if (value!.isEmpty) {
-          return "Voer een Longitude in.";
-        }
-      },
-      onSaved: (value) {
-        _longitude = double.parse(value!);
-      },
-    );
-  }
-
-  Widget _buildingTotalSlotsField(String TotalSlots) {
-    return TextFormField(
-      decoration: InputDecoration(labelText: "Poorten"),
-      keyboardType: TextInputType.number,
-      initialValue: TotalSlots,
-      inputFormatters: <TextInputFormatter>[
-        FilteringTextInputFormatter.digitsOnly,
-      ],
-      validator: (value) {
-        if (value!.isEmpty) {
-          return "Voer de aantal oplaat poorten in";
-        }
-      },
-      onSaved: (value) {
-        _totalSlots = int.parse(value!);
-        // _totalSlots = value! as int;
-      },
-    );
-  }
-
-  Widget _buildingFormElevatedButton(String text, id) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        primary: Color(0xff7672FF),
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-        textStyle: const TextStyle(fontSize: 16),
-      ),
-      child: Text(text),
-      onPressed: () {
-        if (!formKey.currentState!.validate()) {
-          return;
-        }
-        formKey.currentState!.save();
-        //dummy data
-        int _batteryLevel = 89;
-        int _availableSlots = _totalSlots;
-
-        print(MarkerModel(id, _name, _roofed, _latitude, _longitude, _batteryLevel, _availableSlots, _totalSlots));
-        markersApi.updateMarker(id,
-          MarkerModel(id, _name, _roofed, _latitude, _longitude, _batteryLevel, _availableSlots, _totalSlots),
-        );
-      },
+      onSaved: onSaved
     );
   }
 }
