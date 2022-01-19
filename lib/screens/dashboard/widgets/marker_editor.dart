@@ -64,7 +64,17 @@ class MarkerEditor extends StatelessWidget {
 
   Widget buildField(String label, TextInputType keyboardType, String initialValue, void Function(String? value) onSaved) {
     return TextFormField(
-        decoration: InputDecoration(labelText: label),
+      cursorColor: const Color(0xff7672FF),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Color(0xFFA6A6A6)),
+          enabledBorder: const UnderlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFFA6A6A6)),
+          ),
+          focusedBorder: const UnderlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFFA6A6A6)),
+          ),
+        ),
         keyboardType: keyboardType,
         initialValue: initialValue,
         validator: (value) {

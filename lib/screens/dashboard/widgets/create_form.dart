@@ -27,6 +27,7 @@ class _CreateFormViewState extends State<CreateFormView> {
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
         titleSpacing: 0,
+        backgroundColor: const Color(0xff7672FF),
       ),
       body: Container(
         padding: const EdgeInsets.all(16),

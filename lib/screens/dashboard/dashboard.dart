@@ -55,7 +55,7 @@ class _DashboardViewState extends State<DashboardView> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text("Admin Dashboard",style: TextStyle(fontWeight: FontWeight.bold)),
-          titleSpacing: 0,
+        titleSpacing: 0,
         backgroundColor: const Color(0xff7672FF),
       ),
       body: activeSignalRConnection
