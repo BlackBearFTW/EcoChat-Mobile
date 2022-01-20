@@ -11,24 +11,20 @@ class AuthenticationView extends StatefulWidget {
 }
 
 class _AuthenticationViewState extends State<AuthenticationView> {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final AuthenticationApi authenticationApi = AuthenticationApi();
+  bool bToken = false;
+  bool clicked = false;
 
-  late AuthenticationApi authenticationApi;
-  late bool bToken = false;
-  late bool clicked = false;
+  Future<String?> authenticate(_name, _password) async {
 
-  authenticate(_name, _password) async {
-    authenticationApi = AuthenticationApi();
-    // String token = await authenticationApi.login("Vincent", "Vincent");
-    String token = await authenticationApi.login(_name.text, _password.text);
-    if (token != "") {
+    String? token = await authenticationApi.login(_name.text, _password.text);
+    if (token != null) {
       bToken = true;
     }
 
     return token;
   }
-
-  TextEditingController _nameField = TextEditingController();
-  TextEditingController _passwordField = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
