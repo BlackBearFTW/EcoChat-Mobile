@@ -17,7 +17,7 @@ class MarkerPopupButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Flexible(
       child: SizedBox(
         height: 48,
         width: double.infinity,

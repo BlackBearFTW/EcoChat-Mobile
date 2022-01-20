@@ -1,3 +1,5 @@
+import 'package:ecochat_app/global_widgets/marker_popup_button.dart';
+import 'package:ecochat_app/screens/dashboard/dashboard.dart';
 import 'package:ecochat_app/screens/homepage/homepage.dart';
 import 'package:ecochat_app/services/authentication_api.dart';
 import 'package:flutter/cupertino.dart';
@@ -93,15 +95,11 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                   onSaved: (String? value) => password = value!
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                height: 48,
-                width: double.infinity,
-                child: RawMaterialButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
-                  child: const Text("Inloggen", style: TextStyle(color: Colors.white)),
-                  onPressed: () async {
+              MarkerPopupButton(
+                  label: "Inloggen",
+                  backgroundColor: const Color(0xFF8CC63F),
+                  labelColor: Colors.white,
+                  onPress: () async {
                     if (!formKey.currentState!.validate()) return;
                     formKey.currentState!.save();
 
@@ -109,23 +107,16 @@ class _AuthenticationViewState extends State<AuthenticationView> {
 
                     token = await authenticationApi.login(username.trim(), password.trim());
 
-
-
                     if (token == null) {
                       _showIncorrectInputAlertDialog();
                     } else {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const HomeView()),
+                        MaterialPageRoute(builder: (context) => DashboardView(jsonWebToken: token!)),
                       );
                     }
-
-
-
-                  },
-                  fillColor: const Color(0xFF8CC63F),
-                ),
-              )
+                  }
+              ),
             ],
           ),
         ),

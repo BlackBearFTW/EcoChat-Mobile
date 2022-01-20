@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:ecochat_app/global_widgets/marker_popup_button.dart';
 import 'package:ecochat_app/global_widgets/marker_popup_row.dart';
 import 'package:ecochat_app/models/marker_model.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
@@ -74,44 +75,37 @@ class _MarkerPopupState extends State<MarkerPopup> {
 
           MarkerModel? marker = snapshot.data!;
 
-          return Wrap(
-            children: [Container(
-              margin: const EdgeInsets.all(20.0),
-              alignment: Alignment.center,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(marker.name,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    MarkerPopupRow("Accu percentage", "${marker.batteryLevel}%"),
-                    MarkerPopupRow("Vrije USB", "${marker.availableSlots}/${marker.totalSlots}"),
-                    MarkerPopupRow("Overdekt", marker.roofed ? "Ja" : "Nee"),
-                    StreamBuilder(stream: travelTimeStream, builder: (BuildContext context, AsyncSnapshot<int?> snapshot) {
-                      if (snapshot.hasError) print(snapshot.error);
 
-                      String value = "-";
-                      if (snapshot.hasError) value = "Error";
-                      if (snapshot.hasData) value = "${snapshot.data} min";
-                      return MarkerPopupRow("Reistijd", value);
-                    }),
-                  const SizedBox(height: 16),
-                    SizedBox(
-                      height: 48,
-                      width: double.infinity,
-                      child: RawMaterialButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                        elevation: 0,
-                        child: Text(
-                          _polyLines.isEmpty ? "Bekijk Route" : "Stop Route",
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        onPressed: () async {
+          return Wrap(
+            children: [
+              Container(
+                margin: const EdgeInsets.all(20.0),
+                alignment: Alignment.center,
+              child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+                Text(
+                  marker.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                MarkerPopupRow("Accu percentage", "${marker.batteryLevel}%"),
+                MarkerPopupRow("Vrije USB", "${marker.availableSlots}/${marker.totalSlots}"),
+                MarkerPopupRow("Overdekt", marker.roofed ? "Ja" : "Nee"),
+                StreamBuilder(stream: travelTimeStream, builder: (BuildContext context, AsyncSnapshot<int?> snapshot) {
+                  if (snapshot.hasError) print(snapshot.error);
+
+                  String value = "-";
+                  if (snapshot.hasError) value = "Error";
+                  if (snapshot.hasData) value = "${snapshot.data} min";
+                  return MarkerPopupRow("Reistijd", value);
+                }),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    MarkerPopupButton(
+                        label: _polyLines.isEmpty ? "Bekijk Route" : "Stop Route",
+                        backgroundColor: Color(locationAllowed ? (_polyLines.isEmpty ? 0xFF8CC63F : 0xFFC63F3F) : 0xFFA6A6A6),
+                        labelColor: Colors.white,
+                        onPress: () async {
                           if(!locationAllowed) return _showLocationAlertDialog();
 
                           if (_polyLines.isEmpty) {
@@ -124,14 +118,13 @@ class _MarkerPopupState extends State<MarkerPopup> {
                             setState(() => _polyLines = {});
                             widget.polyLineSetter({});
                           }
-                        },
-                        fillColor: Color(locationAllowed ? (_polyLines.isEmpty ? 0xFF8CC63F : 0xFFC63F3F) : 0xFFA6A6A6),
-                      ),
-                    )
-                  ]),
-            )
-            ],
-          );
+                        }
+                    ),
+                  ],
+                )
+              ]),
+            ),
+          ]);
         });
   }
 

@@ -13,7 +13,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:signalr_netcore/hub_connection.dart';
 
 class DashboardView extends StatefulWidget {
-  const DashboardView({Key? key}) : super(key: key);
+  final String jsonWebToken;
+
+  const DashboardView({Key? key, required this.jsonWebToken}) : super(key: key);
 
   @override
   State<DashboardView> createState() => _DashboardViewState();
@@ -24,8 +26,6 @@ class _DashboardViewState extends State<DashboardView> {
   bool locationAllowed = false;
   bool activeSignalRConnection = false;
 
-  // TODO: FETCH FROM LOGIN SCREEN
-  final String TEST_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IlZpbmNlbnQiLCJyb2xlIjoiNGRNMW5mcjBtM2MwQ2g0VCIsIm5iZiI6MTY0MjYyNDc1NywiZXhwIjoxNjQyNjI4MzU3LCJpYXQiOjE2NDI2MjQ3NTd9.0HjNy86NRgfibvpvvEXMWnDvgkbN7N6h28X3lbbgwnU";
   final Completer<GoogleMapController> _mapController = Completer();
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
   BitmapDescriptor grayMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
@@ -95,7 +95,7 @@ class _DashboardViewState extends State<DashboardView> {
               backgroundColor: Colors.white,
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => CreateFormView(TEST_TOKEN)),
+                MaterialPageRoute(builder: (context) => CreateFormView(widget.jsonWebToken)),
               ),
             )));
   }
@@ -140,7 +140,7 @@ class _DashboardViewState extends State<DashboardView> {
       return MarkerPopup(
         signalRMarkersInstance: signalRMarkers,
         markerId: _markerId,
-        jsonWebToken: TEST_TOKEN,
+        jsonWebToken: widget.jsonWebToken,
         closeMarkerPopup: _closeBottomSheet,
       );
     },
