@@ -1,0 +1,4 @@
+enum FormAction {
+  CREATE,
+  UPDATE
+}
