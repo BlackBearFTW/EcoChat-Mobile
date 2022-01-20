@@ -13,9 +13,16 @@ class AuthenticationView extends StatefulWidget {
 class _AuthenticationViewState extends State<AuthenticationView> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final AuthenticationApi authenticationApi = AuthenticationApi();
+  late bool _passwordVisible;
   String username = "";
   String password = "";
   String? token = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordVisible = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +60,7 @@ class _AuthenticationViewState extends State<AuthenticationView> {
               ),
               TextFormField(
                   cursorColor: const Color(0xff7672FF),
-                  obscureText: true,
+                  obscureText: !_passwordVisible,
                   decoration: const InputDecoration(
                     labelText: "Wachtwoord",
                     labelStyle: TextStyle(color: Color(0xFFA6A6A6)),
@@ -63,6 +70,17 @@ class _AuthenticationViewState extends State<AuthenticationView> {
                     focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Color(0xFFA6A6A6)),
                     ),
+
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                          Icons.visibility
+                      ),
+                      onPressed: () {
+                        print()
+                        password = "";
+                      },
+                    ),
+
                   ),
                   validator: (value) {
                     if (value!.isNotEmpty) return null;
