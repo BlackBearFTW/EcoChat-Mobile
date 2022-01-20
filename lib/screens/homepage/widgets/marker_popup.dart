@@ -91,21 +91,14 @@ class _MarkerPopupState extends State<MarkerPopup> {
                     MarkerPopupRow("Accu percentage", "${marker.batteryLevel}%"),
                     MarkerPopupRow("Vrije USB", "${marker.availableSlots}/${marker.totalSlots}"),
                     MarkerPopupRow("Overdekt", marker.roofed ? "Ja" : "Nee"),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("Reistijd"),
-                        if (!locationAllowed) const Text("-")
-                        else StreamBuilder(
-                            stream: travelTimeStream,
-                            builder: (BuildContext context, AsyncSnapshot<int?> snapshot) {
-                              if (snapshot.hasError) print(snapshot.error);
+                    StreamBuilder(stream: travelTimeStream, builder: (BuildContext context, AsyncSnapshot<int?> snapshot) {
+                      if (snapshot.hasError) print(snapshot.error);
 
-                              if (snapshot.hasError) return const Text("Error");
-                              if (!snapshot.hasData) return const Text("-");
-                              return Text("${snapshot.data} min");
-                            }),
-                      ]),
+                      String value = "-";
+                      if (snapshot.hasError) value = "Error";
+                      if (snapshot.hasData) value = "${snapshot.data} min";
+                      return MarkerPopupRow("Reistijd", value);
+                    }),
                   const SizedBox(height: 16),
                     SizedBox(
                       height: 48,
