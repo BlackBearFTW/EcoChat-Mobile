@@ -61,27 +61,31 @@ class _AuthenticationViewState extends State<AuthenticationView> {
               TextFormField(
                   cursorColor: const Color(0xff7672FF),
                   obscureText: !_passwordVisible,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: "Wachtwoord",
-                    labelStyle: TextStyle(color: Color(0xFFA6A6A6)),
-                    enabledBorder: UnderlineInputBorder(
+                    labelStyle: const TextStyle(color: Color(0xFFA6A6A6)),
+                    enabledBorder: const UnderlineInputBorder(
                       borderSide: BorderSide(color: Color(0xFFA6A6A6)),
                     ),
-                    focusedBorder: UnderlineInputBorder(
+                    focusedBorder: const UnderlineInputBorder(
                       borderSide: BorderSide(color: Color(0xFFA6A6A6)),
                     ),
 
                     suffixIcon: IconButton(
                       icon: Icon(
-                          Icons.visibility
+                        _passwordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: const Color(0xff7672FF)
                       ),
                       onPressed: () {
-                        print()
-                        password = "";
+                        setState(() {
+                          _passwordVisible = !_passwordVisible;
+                        });
                       },
                     ),
-
                   ),
+
                   validator: (value) {
                     if (value!.isNotEmpty) return null;
                     return "Voer een wachtwoord in.";
