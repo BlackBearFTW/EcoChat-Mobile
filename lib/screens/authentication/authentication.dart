@@ -13,114 +13,115 @@ class AuthenticationView extends StatefulWidget {
 class _AuthenticationViewState extends State<AuthenticationView> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final AuthenticationApi authenticationApi = AuthenticationApi();
-  bool bToken = false;
-  bool clicked = false;
-
-  Future<String?> authenticate(_name, _password) async {
-
-    String? token = await authenticationApi.login(_name.text, _password.text);
-    if (token != null) {
-      bToken = true;
-    }
-
-    return token;
-  }
+  String username = "";
+  String password = "";
+  String? token = "";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("EcoChat", style: TextStyle(fontWeight: FontWeight.bold)),
+        titleSpacing: 0,
+        title: const Text("Inloggen",
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xff7672FF),
       ),
-      body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          decoration: const BoxDecoration(
-            color: Color(0xff7672FF),
-          ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              bToken
-                  ? Container()
-                  : clicked
-                      ? const Text(
-                          "Uw gebruikers naam of wachtwoord is incorrect.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
-                          // overflow: TextOverflow.ellipsis,
-                        )
-                      : Container(),
-              const SizedBox(
-                height: 15,
-              ),
-              Container(
-                width: MediaQuery.of(context).size.width / 1.3,
-                child: TextFormField(
-                  style: TextStyle(color: Colors.white),
-                  controller: _nameField,
+              TextFormField(
+                  cursorColor: const Color(0xff7672FF),
                   decoration: const InputDecoration(
-                    hintText: "Naam",
-                    hintStyle: TextStyle(
-                      color: Colors.white,
+                    labelText: "Gebruikersnaam",
+                    labelStyle: TextStyle(color: Color(0xFFA6A6A6)),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFA6A6A6)),
                     ),
-                    labelText: "Naam",
-                    labelStyle: TextStyle(
-                      color: Colors.white,
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFA6A6A6)),
                     ),
                   ),
-                ),
+                  validator: (value) {
+                    if (value!.isNotEmpty) return null;
+                    return "Voer een gebruikersnaam in.";
+                  },
+                  onSaved: (String? value) => username = value!
               ),
-              SizedBox(height: MediaQuery.of(context).size.height / 35),
-              Container(
-                width: MediaQuery.of(context).size.width / 1.3,
-                child: TextFormField(
-                  style: TextStyle(color: Colors.white),
-                  controller: _passwordField,
+              TextFormField(
+                  cursorColor: const Color(0xff7672FF),
                   obscureText: true,
                   decoration: const InputDecoration(
-                    hintText: "Wachtwoord",
-                    hintStyle: TextStyle(
-                      color: Colors.white,
-                    ),
                     labelText: "Wachtwoord",
-                    labelStyle: TextStyle(
-                      color: Colors.white,
+                    labelStyle: TextStyle(color: Color(0xFFA6A6A6)),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFA6A6A6)),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFA6A6A6)),
                     ),
                   ),
-                ),
+                  validator: (value) {
+                    if (value!.isNotEmpty) return null;
+                    return "Voer een wachtwoord in.";
+                  },
+                  onSaved: (String? value) => password = value!
               ),
-              SizedBox(height: MediaQuery.of(context).size.height / 35),
-              Container(
-                width: MediaQuery.of(context).size.width / 1.4,
-                height: 45,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15.0),
-                  color: Colors.white,
-                ),
-                child: MaterialButton(
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 48,
+                width: double.infinity,
+                child: RawMaterialButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  elevation: 0,
+                  child: const Text("Inloggen", style: TextStyle(color: Colors.white)),
                   onPressed: () async {
-                    authenticate(_nameField, _passwordField);
-                    clicked = true;
-                    setState(() {});
-                    if (bToken) {
+                    if (!formKey.currentState!.validate()) return;
+                    formKey.currentState!.save();
+
+                    print("Gebruikersnaam: $username, Wachtwoord: $password");
+
+                    token = await authenticationApi.login(username.trim(), password.trim());
+
+
+
+                    if (token == null) {
+                      _showIncorrectInputAlertDialog();
+                    } else {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => HomeView(),
-                        ),
+                        MaterialPageRoute(builder: (context) => const HomeView()),
                       );
                     }
+
+
+
                   },
-                  child: const Text("Login"),
+                  fillColor: const Color(0xFF8CC63F),
                 ),
-              ),
+              )
             ],
-          )),
+          ),
+        ),
+      ),
     );
+  }
+
+  void _showIncorrectInputAlertDialog() {
+    showDialog(context: context, builder: (BuildContext context) =>
+        AlertDialog(
+            title: const Text("Ongeldige login"),
+            content: const Text("De ingevoerde gebruikersnaam/wachtwoord combinatie is onjuist."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Oké", style: TextStyle(color: Color(0xFF8CC63F))),
+              )
+            ]
+        ));
   }
 }
