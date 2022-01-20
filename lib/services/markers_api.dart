@@ -4,6 +4,7 @@ import 'package:ecochat_app/models/marker_model.dart';
 
 class MarkersApi {
   String serverUrl = "https://i496018core.venus.fhict.nl/api/Markers/";
+
   late Map<String, String> headers;
 
   MarkersApi(String? token) {
@@ -40,7 +41,7 @@ class MarkersApi {
     await http.post(
       Uri.parse(serverUrl),
       headers: headers,
-      body: json.encode(data),
+      body: json.encode(data.toJson()),
     );
   }
 
@@ -48,7 +49,7 @@ class MarkersApi {
     await http.put(
       Uri.parse(serverUrl + guid),
       headers: headers,
-      body: json.encode(modifiedData),
+      body: json.encode(modifiedData.toJson()),
     );
   }
 
@@ -57,6 +58,5 @@ class MarkersApi {
       Uri.parse(serverUrl + guid),
       headers: headers,
     );
-
   }
 }

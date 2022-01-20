@@ -32,7 +32,6 @@ dependencies:
     sdk: flutter
   meta: ^1.7.0
   signalr_netcore: 1.2.3
-  dio: ^4.0.4
   google_maps_flutter: ^2.1.1
   http: ^0.13.4
   geolocator: ^8.0.1

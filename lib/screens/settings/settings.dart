@@ -36,6 +36,7 @@ class _SettingsViewState extends State<SettingsView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Instellingen", style: TextStyle(fontWeight: FontWeight.bold)),
+        titleSpacing: 0,
         backgroundColor: const Color(0xff7672FF),
       ),
       body: Column(
@@ -73,7 +74,7 @@ class _SettingsViewState extends State<SettingsView> {
             color: Color(0xffd9d9d9),
           ),
           Padding(
-            padding: EdgeInsets.all(5.0),
+            padding: EdgeInsets.all(16.0),
             child: Center(
               child:TextButton(
                 style: ButtonStyle(

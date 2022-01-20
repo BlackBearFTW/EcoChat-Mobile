@@ -9,10 +9,10 @@ abstract class SignalR {
   HubConnection? _hubConnection;
 
   SignalR(String hubName) {
-    _hubConnection =
-        HubConnectionBuilder().withUrl(serverUrl + hubName).build();
+    _hubConnection = HubConnectionBuilder().withUrl(serverUrl + hubName).build();
     _hubConnection?.onclose(({Exception? error}) => print(error));
   }
+
 
   Future<void> initializeConnection() async {
     if (_hubConnection?.state == HubConnectionState.Connected) return;

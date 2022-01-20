@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:ecochat_app/models/marker_model.dart';
-import 'package:ecochat_app/screens/homepage/widgets/mylocation_button.dart';
-import 'package:ecochat_app/screens/homepage/widgets/marker_popup.dart';
-import 'package:ecochat_app/screens/settings/settings.dart';
+import 'package:ecochat_app/screens/dashboard/widgets/create_form.dart';
+import 'package:ecochat_app/screens/dashboard/widgets/marker_popup.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
 import 'package:ecochat_app/utils/image_util.dart';
 import 'package:flutter/foundation.dart';
@@ -13,25 +12,25 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:signalr_netcore/hub_connection.dart';
 
-class HomeView extends StatefulWidget {
-  const HomeView({Key? key}) : super(key: key);
+class DashboardView extends StatefulWidget {
+  final String jsonWebToken;
+
+  const DashboardView({Key? key, required this.jsonWebToken}) : super(key: key);
 
   @override
-  State<HomeView> createState() => _HomeViewState();
+  State<DashboardView> createState() => _DashboardViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _DashboardViewState extends State<DashboardView> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   bool locationAllowed = false;
   bool activeSignalRConnection = false;
 
   final Completer<GoogleMapController> _mapController = Completer();
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
-  BitmapDescriptor grayMarkerIcon =
-      BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
+  BitmapDescriptor grayMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
   SignalRMarkers signalRMarkers = SignalRMarkers();
   late final stream = signalRMarkers.getAllMarkersStream();
-  Set<Polyline> _polyLines = {};
   PersistentBottomSheetController? bottomSheetController;
   double _fabBottomPadding = 0;
 
@@ -46,8 +45,7 @@ class _HomeViewState extends State<HomeView> {
     });
 
     signalRMarkers.initializeConnection().then((value) {
-      setState(() => activeSignalRConnection =
-          signalRMarkers.getStatus() == HubConnectionState.Connected);
+      setState(() => activeSignalRConnection = signalRMarkers.getStatus() == HubConnectionState.Connected);
     });
   }
 
@@ -56,17 +54,8 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text("EcoChat",
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsView()),
-            );
-          }, icon: const Icon(Icons.settings))
-        ],
-        automaticallyImplyLeading: false,
+        title: const Text("Admin Dashboard",style: TextStyle(fontWeight: FontWeight.bold)),
+        titleSpacing: 0,
         backgroundColor: const Color(0xff7672FF),
       ),
       body: activeSignalRConnection
@@ -74,8 +63,7 @@ class _HomeViewState extends State<HomeView> {
               stream: stream,
               builder: (BuildContext context,
                   AsyncSnapshot<List<MarkerModel>?> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting ||
-                    !snapshot.hasData) {
+                if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
                   return const Center(child: Text("Loading Map...."));
                 }
 
@@ -95,28 +83,21 @@ class _HomeViewState extends State<HomeView> {
                   tiltGesturesEnabled: false,
                   onMapCreated: _onGoogleMapLoad,
                   markers: _markers,
-                  polylines: _polyLines,
                   mapToolbarEnabled: false,
-                  onTap: (_) => _onMapPress(),
+                  onTap: (_) => _closeBottomSheet(),
                 );
               })
           : const Center(child: Text("Loading Map...")),
-      floatingActionButton: FutureBuilder<GoogleMapController>(
-          future: _mapController.future,
-          builder: (BuildContext context,
-              AsyncSnapshot<GoogleMapController> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting ||
-                !snapshot.hasData) return Container();
-
-            return Padding(
-              padding: EdgeInsets.only(bottom: _fabBottomPadding),
-              child: MyLocationButton(
-                disabled: locationAllowed,
-                googleMapController: snapshot.data!,
+        floatingActionButton: Padding(
+            padding: EdgeInsets.only(bottom: _fabBottomPadding),
+            child: FloatingActionButton(
+              child: const Icon(Icons.add, color: Colors.black),
+              backgroundColor: Colors.white,
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CreateFormView(widget.jsonWebToken)),
               ),
-            );
-          }),
-    );
+            )));
   }
 
   void _loadCustomMarkerIcon() async {
@@ -149,7 +130,7 @@ class _HomeViewState extends State<HomeView> {
         LatLng(locationData.latitude, locationData.longitude), 18));
   }
 
-  void _onMapPress() async {
+  void _closeBottomSheet() async {
     if (bottomSheetController == null) return;
     bottomSheetController!.close();
   }
@@ -159,9 +140,8 @@ class _HomeViewState extends State<HomeView> {
       return MarkerPopup(
         signalRMarkersInstance: signalRMarkers,
         markerId: _markerId,
-        polyLineSetter: (Set<Polyline> polyLines) =>
-            setState(() => _polyLines = polyLines),
-        polyLines: _polyLines,
+        jsonWebToken: widget.jsonWebToken,
+        closeMarkerPopup: _closeBottomSheet,
       );
     },
     shape: const RoundedRectangleBorder(
