@@ -1,3 +1,4 @@
+import 'package:ecochat_app/screens/authentication/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';

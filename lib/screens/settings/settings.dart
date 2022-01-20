@@ -1,3 +1,4 @@
+import 'package:ecochat_app/screens/authentication/authentication.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -71,12 +72,22 @@ class _SettingsViewState extends State<SettingsView> {
             thickness: 1,
             color: Color(0xffd9d9d9),
           ),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          Padding(
+            padding: EdgeInsets.all(5.0),
             child: Center(
-              child: Text("Login",
-                  textAlign: TextAlign.center
+              child:TextButton(
+                style: ButtonStyle(
+                  foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AuthenticationView()),
+                  );
+                },
+                child: Text('Login'),
               ),
+
             ),
           ),
           const Divider(

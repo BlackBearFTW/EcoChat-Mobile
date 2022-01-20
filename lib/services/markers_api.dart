@@ -57,5 +57,6 @@ class MarkersApi {
       Uri.parse(serverUrl + guid),
       headers: headers,
     );
+
   }
 }
