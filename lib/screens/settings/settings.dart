@@ -1,4 +1,4 @@
-import 'package:ecochat_app/screens/dashboard/dashboard.dart';
+import 'package:ecochat_app/screens/authentication/authentication.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -76,18 +76,19 @@ class _SettingsViewState extends State<SettingsView> {
           Padding(
             padding: EdgeInsets.all(16.0),
             child: Center(
-              child: TextButton(
+              child:TextButton(
                 style: ButtonStyle(
-                  foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                  foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
                 ),
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const DashboardView()),
+                    MaterialPageRoute(builder: (context) => const AuthenticationView()),
                   );
                 },
                 child: Text('Login'),
               ),
+
             ),
           ),
           const Divider(

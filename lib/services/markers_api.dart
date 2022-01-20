@@ -54,10 +54,9 @@ class MarkersApi {
   }
 
   void deleteMarker(String guid) async {
-    http.Response response = await http.delete(
+    await http.delete(
       Uri.parse(serverUrl + guid),
       headers: headers,
     );
-    print(response);
   }
 }
