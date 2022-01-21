@@ -27,7 +27,8 @@ void main() async {
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     AndroidBatteryInfo? batteryInfo = await BatteryInfoPlugin().androidBatteryInfo;
-    int _minBatteryLevel = await getBatteryWarningLevel();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int _minBatteryLevel = prefs.getInt("batteryWarningLevel") ?? 0;
 
     if (batteryInfo == null) return Future.value(false);
 
@@ -43,9 +44,7 @@ void callbackDispatcher() {
 
     int? _distance = markers.fold(null, (int? total, MarkerModel current) {
       if (current.batteryLevel == 0) return total;
-      int currentValue = current
-          .distanceFrom(LatLng(location.latitude, location.longitude))
-          .round();
+      int currentValue = current.distanceFrom(LatLng(location.latitude, location.longitude)).round();
       if (total == null) return currentValue;
       return currentValue < total ? currentValue : total;
     });
@@ -57,9 +56,4 @@ void callbackDispatcher() {
 
     return Future.value(true);
   });
-}
-
-Future<int> getBatteryWarningLevel() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getInt("batteryWarningLevel") ?? 0;
 }

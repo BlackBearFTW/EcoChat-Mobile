@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:ecochat_app/models/marker_model.dart';
 import 'package:ecochat_app/screens/dashboard/widgets/create_form.dart';
-import 'package:ecochat_app/screens/dashboard/widgets/marker_popup.dart';
+import 'package:ecochat_app/screens/dashboard/widgets/admin_marker_popup.dart';
 import 'package:ecochat_app/services/markers_signalr.dart';
 import 'package:ecochat_app/utils/image_util.dart';
 import 'package:flutter/foundation.dart';
@@ -137,7 +137,7 @@ class _DashboardViewState extends State<DashboardView> {
 
   void _showMarkerBottomSheet(String _markerId) async {
     bottomSheetController = _scaffoldKey.currentState?.showBottomSheet((BuildContext context) {
-      return MarkerPopup(
+      return AdminMarkerPopup(
         signalRMarkersInstance: signalRMarkers,
         markerId: _markerId,
         jsonWebToken: widget.jsonWebToken,
