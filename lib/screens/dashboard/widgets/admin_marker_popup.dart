@@ -16,13 +16,13 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:skeleton_loader/skeleton_loader.dart';
 
-class MarkerPopup extends StatefulWidget {
+class AdminMarkerPopup extends StatefulWidget {
   final SignalRMarkers signalRMarkersInstance;
   final String markerId;
   final String jsonWebToken;
   final void Function() closeMarkerPopup;
 
-  const MarkerPopup({Key? key,
+  const AdminMarkerPopup({Key? key,
       required this.signalRMarkersInstance,
       required this.markerId,
       required this.jsonWebToken,
@@ -33,7 +33,7 @@ class MarkerPopup extends StatefulWidget {
   _MarkerPopupState createState() => _MarkerPopupState();
 }
 
-class _MarkerPopupState extends State<MarkerPopup> {
+class _MarkerPopupState extends State<AdminMarkerPopup> {
   Stream<int?>? travelTimeStream;
   late LocationSettings locationSettings;
   bool locationAllowed = false;

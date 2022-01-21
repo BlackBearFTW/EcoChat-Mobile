@@ -32,8 +32,8 @@ class _MarkerEditorState extends State<MarkerEditor> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           buildField("Naam", TextInputType.name, widget.marker.name, (value) => widget.marker.name = value!),
-          buildField("Latitude", TextInputType.number, "${widget.marker.latitude}", (value) => widget.marker.latitude = double.parse(value!)),
-          buildField("Longitude", TextInputType.number, "${widget.marker.longitude}", (value) => widget.marker.longitude = double.parse(value!)),
+          buildField("Breedtegraad", TextInputType.number, "${widget.marker.latitude}", (value) => widget.marker.latitude = double.parse(value!)),
+          buildField("Lengtegraad", TextInputType.number, "${widget.marker.longitude}", (value) => widget.marker.longitude = double.parse(value!)),
           buildField("Aantal poorten", TextInputType.number, "${widget.marker.totalSlots}", (value) => widget.marker.totalSlots = int.parse(value!)),
           Padding(
             padding: const EdgeInsets.only(top: 16, bottom: 0),
@@ -69,7 +69,7 @@ class _MarkerEditorState extends State<MarkerEditor> {
                     if (!formKey.currentState!.validate()) return;
                     formKey.currentState!.save();
 
-                    widget.marker.availableSlots = widget.marker.totalSlots;
+                    if (widget.marker.availableSlots > widget.marker.totalSlots) widget.marker.availableSlots = widget.marker.totalSlots;
 
                     widget.onSave(widget.marker);
                   }
